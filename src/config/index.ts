@@ -5,6 +5,7 @@ const TESTNET_CONTENT_HOST = "https://man-test.metaid.io";
 const MAINNET_CONTENT_HOST = "https://man.metaid.io";
 export const MAINNET_MAN_HOST_V1 = "https://v1man.metaid.io";
 export const METAFS_API = "https://file.metaid.io/metafile-indexer/api/v1/files";
+export const METAFS_INDEXER_API="https://file.metaid.io/metafile-indexer/api/v1"
 
 export const getHostByNet = (network: API.Network) => {
   if (network === "testnet") return TESTNET_CONTENT_HOST;
@@ -46,10 +47,11 @@ export const DASHBOARD_ADMIN_PUBKEY = "DASHBOARD_ADMIN_PUBKEY";
 //   window.BUILD_ENV === "docker" ? "/man" : "https://www.show.now/man";
 // export const BASE_MAN_URL = "http://127.0.0.1:3000/man";
 // export const BASE_MAN_URL = "https://man-test.metaid.io";
-export const BASE_MAN_URL =
-  BUILD_ENV === "testnetDev" || BUILD_ENV === "mainnetDev"
+export const BASE_MAN_URL =  BUILD_ENV === "testnetDev" || BUILD_ENV === "mainnetDev"
     ? "http://127.0.0.1:3000/man"
     : window.location.origin + "/man";
+
+
 
 console.log(BASE_MAN_URL, "BASE_MAN_URL");
 

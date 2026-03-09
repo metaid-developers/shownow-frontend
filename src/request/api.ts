@@ -5,6 +5,7 @@ import {
   DASHBOARD_ADMIN_PUBKEY,
   DASHBOARD_SIGNATURE,
   getHostByNet,
+  METAFS_INDEXER_API,
   MAINNET_MAN_HOST_V1,
   MARKET_ENDPOINT,
   METASO_BASE_API,
@@ -14,7 +15,7 @@ import { Notification } from "@/utils/NotificationStore";
 import { IBtcConnector } from "@metaid/metaid";
 import axios from "axios";
 import { number } from "bitcoinjs-lib/src/script";
-import { UserInfo } from "node_modules/@metaid/metaid/dist/types";
+import { UserInfo,UserInfoByMs } from "node_modules/@metaid/metaid/dist/types";
 import { request } from "umi";
 export type BtcNetwork = "mainnet" | "testnet" | "regtest";
 
@@ -331,16 +332,35 @@ export async function getMetaidByAddress({
 }: {
   address: string;
 }): Promise<{ metaid: string } | undefined> {
-  const url = `${BASE_MAN_URL}/api/info/address/${address}`;
-
+  const url = `${METAFS_INDEXER_API}/users/address/${address}`;
+  
   try {
     const data = await axios.get(url).then((res) => res.data);
+    if(data.data){
+      data.data.metaid =  data.data.metaId
+    }
     return data.data;
   } catch (error) {
     console.error(error);
     return undefined;
   }
 }
+
+// export async function getMetaidByAddress({
+//   address,
+// }: {
+//   address: string;
+// }): Promise<{ metaid: string } | undefined> {
+//   const url = `${BASE_MAN_URL}/api/info/address/${address}`;
+
+//   try {
+//     const data = await axios.get(url).then((res) => res.data);
+//     return data.data;
+//   } catch (error) {
+//     console.error(error);
+//     return undefined;
+//   }
+// }
 
 export async function getPubKey(): Promise<string> {
   const url = `${BASE_MAN_URL}/api/access/getPubKey`;
@@ -457,18 +477,37 @@ export const getDecryptContent = async (
   });
 };
 
+
 export const getUserInfo = async (params: { address: string }) => {
   if (!params.address) {
     return undefined;
   }
+  
   const ret = await request<{
     code: number;
-    data: UserInfo;
-  }>(`${getHostByNet(curNetwork)}/api/info/address/${params.address}`, {
+    data: UserInfoByMs;
+  }>(`${METAFS_INDEXER_API}/users/address/${params.address}`, {
     method: "GET",
   });
+  
+  if(ret.data){
+    ret.data.metaid=ret.data.metaId
+  }
   return ret.data ?? undefined;
 };
+
+// export const getUserInfo = async (params: { address: string }) => {
+//   if (!params.address) {
+//     return undefined;
+//   }
+//   const ret = await request<{
+//     code: number;
+//     data: UserInfoByMs;
+//   }>(`${getHostByNet(curNetwork)}/api/info/address/${params.address}`, {
+//     method: "GET",
+//   });
+//   return ret.data ?? undefined;
+// };
 export const getUserInfoByMetaid = async (params: { metaid: string }) => {
   if (!params.metaid) {
     return undefined;

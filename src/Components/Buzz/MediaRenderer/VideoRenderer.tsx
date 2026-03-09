@@ -32,7 +32,7 @@ type Metafile = {
 };
 
 async function fetchChunksAndCombine(chunkUrls: string[], dataType: string) {
-debugger;
+
     const responses = await Promise.all(chunkUrls.map(url => fetch(url)));
     const arrays = await Promise.all(responses.map(response => response.arrayBuffer()));
     const combined = new Uint8Array(arrays.reduce((acc, curr) => acc.concat(Array.from(new Uint8Array(curr)) as any), []));
