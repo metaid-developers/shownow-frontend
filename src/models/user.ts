@@ -30,6 +30,7 @@ import { add, isEmpty, set } from "ramda";
 import { useModel } from "umi";
 import { NotificationStore } from "@/utils/NotificationStore";
 import { UserInfo } from "node_modules/@metaid/metaid/dist/types";
+import { buildUserState } from "@/utils/userProfile";
 const checkExtension = () => {
   if (!window.metaidwallet) {
     window.open("https://www.metalet.space/");
@@ -88,6 +89,55 @@ export default () => {
   const [searchWord, setSearchWord] = useState("");
   const [mockBuzz, setMockBuzz] = useState<API.Buzz>();
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const getLocalProfile = useCallback((address: string) => {
+    const localStorageProfile = sessionStorage.getItem(`${address}_profile`);
+    let profile: Record<string, string> = {};
+
+    if (localStorageProfile) {
+      try {
+        profile = JSON.parse(localStorageProfile);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    return profile;
+  }, []);
+  const resolveConnectorUser = useCallback(
+    async (connector: IBtcConnector | IMvcConnector) => {
+      if (connector.user) {
+        return connector.user as UserInfo & { metaId?: string };
+      }
+
+      try {
+        return (await getUserInfo({
+          address: connector.wallet.address,
+        })) as UserInfo & { metaId?: string };
+      } catch (error) {
+        console.error("fallback getUserInfo failed", error);
+        return undefined;
+      }
+    },
+    []
+  );
+  const syncUserFromConnector = useCallback(
+    async (connector: IBtcConnector | IMvcConnector) => {
+      const resolvedUser = await resolveConnectorUser(connector);
+      const profile = getLocalProfile(connector.wallet.address);
+
+      setUser(
+        buildUserState({
+          address: connector.wallet.address,
+          userInfo: resolvedUser,
+          profile,
+          baseUrl: AVATAR_BASE_URL,
+        })
+      );
+
+      return resolvedUser;
+    },
+    [getLocalProfile, resolveConnectorUser]
+  );
   const connectWallet = useCallback(async () => {
     const [isConnected, errMsg] = await checkWallet();
     if (!isConnected && !isEmpty(errMsg)) {
@@ -136,29 +186,7 @@ export default () => {
     });
     setMvcConnector(mvcConnector);
     const connector = chain === "btc" ? btcConnector : mvcConnector;
-    const localStorageProfile = sessionStorage.getItem(
-      `${connector.wallet.address}_profile`
-    );
-    let profile: Record<string, string> = {};
-    if (localStorageProfile) {
-      try {
-        profile = JSON.parse(localStorageProfile);
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    setUser({
-      avatar: connector.user.avatar
-        ? `${AVATAR_BASE_URL}${connector.user.avatar}`
-        : "",
-      background: connector.user.background
-        ? `${AVATAR_BASE_URL}${connector.user.background}`
-        : "",
-      name: connector.user.name || profile.name,
-      metaid: connector.user.metaid,
-      bio: connector.user.bio || profile.bio || "",
-      address: connector.wallet.address,
-    });
+    const resolvedUser = await syncUserFromConnector(connector);
     const publicKey = await window.metaidwallet.btc.getPublicKey();
     const signature: any =
       await window.metaidwallet.btc.signMessage("metaso.network");
@@ -169,14 +197,16 @@ export default () => {
       wallet: "metalet",
       status: "connected",
     })}; path=/`;
-    document.cookie = `user-info=${JSON.stringify(connector.user)}; path=/`;
+    document.cookie = `user-info=${JSON.stringify(
+      resolvedUser ?? {}
+    )}; path=/`;
     document.cookie = `credential=${JSON.stringify([
       {
         signature,
         publicKey,
       },
     ])}; path=/`;
-  }, [chain]);
+  }, [chain, syncUserFromConnector]);
 
   const disConnect = async () => {
     const ret = await window.metaidwallet.disconnect();
@@ -268,77 +298,42 @@ export default () => {
       });
       setMvcConnector(mvcConnector);
       const connector = chain === "btc" ? btcConnector : mvcConnector;
-      if (connector.user) {
-        const localStorageProfile = sessionStorage.getItem(
-          `${connector.wallet.address}_profile`
-        );
-        let profile: Record<string, string> = {};
-        if (localStorageProfile) {
-          try {
-            profile = JSON.parse(localStorageProfile);
-          } catch (e) {
-            console.log(e);
-          }
-        }
-        setUser({
-          avatar: connector.user.avatar
-            ? `${AVATAR_BASE_URL}${connector.user.avatar}`
-            : "",
-          background: connector.user.background
-            ? `${AVATAR_BASE_URL}${connector.user.background}`
-            : "",
-          name: connector.user.name || profile.name,
-          metaid: connector.user.metaid,
-          bio: connector.user.bio || profile.bio || "",
-          address: connector.wallet.address,
-        });
+      const resolvedUser = await syncUserFromConnector(connector);
 
-        document.cookie = `last-connection=${JSON.stringify({
-          wallet: "metalet",
-          status: "connected",
-        })}; path=/`;
-        document.cookie = `user-info=${JSON.stringify(connector.user)}; path=/`;
-        document.cookie = `credential=${JSON.stringify([
-          {
-            signature: localStorage.getItem(DASHBOARD_SIGNATURE),
-            publicKey: localStorage.getItem(DASHBOARD_ADMIN_PUBKEY),
-          },
-        ])}; path=/`;
-      }
+      document.cookie = `last-connection=${JSON.stringify({
+        wallet: "metalet",
+        status: "connected",
+      })}; path=/`;
+      document.cookie = `user-info=${JSON.stringify(
+        resolvedUser ?? {}
+      )}; path=/`;
+      document.cookie = `credential=${JSON.stringify([
+        {
+          signature: localStorage.getItem(DASHBOARD_SIGNATURE),
+          publicKey: localStorage.getItem(DASHBOARD_ADMIN_PUBKEY),
+        },
+      ])}; path=/`;
 
       setIsLogin(true);
     }
     setInitializing(false);
-  }, [chain]);
+  }, [chain, syncUserFromConnector]);
 
   const fetchUserInfo = useCallback(async () => {
-    const localStorageProfile = sessionStorage.getItem(
-      `${user.address}_profile`
-    );
-    let profile: Record<string, string> = {};
-    if (localStorageProfile) {
-      try {
-        profile = JSON.parse(localStorageProfile);
-      } catch (e) {
-        console.log(e);
-      }
-    }
     if (!user.address) {
       return;
     }
+    const profile = getLocalProfile(user.address);
     const userInfo = (await getUserInfo({ address: user.address })) as UserInfo;
-    setUser({
-      avatar: userInfo.avatar ? `${AVATAR_BASE_URL}${userInfo.avatar}` : "",
-      background: userInfo.background
-        ? `${AVATAR_BASE_URL}${userInfo.background}`
-        : "",
-      name: userInfo.name || profile.name,
-      metaid: userInfo.metaid,
-      bio: userInfo.bio || profile.bio || "",
-
-      address: userInfo.address,
-    });
-  }, [user]);
+    setUser(
+      buildUserState({
+        address: userInfo.address,
+        userInfo,
+        profile,
+        baseUrl: AVATAR_BASE_URL,
+      })
+    );
+  }, [getLocalProfile, user.address]);
 
   const _fetchNotification = useCallback(async () => {
     if (!user.address) {
@@ -410,29 +405,7 @@ export default () => {
   const switchChain = async (chain: API.Chain) => {
     if (!btcConnector || !mvcConnector) return;
     const connector = chain === "btc" ? btcConnector : mvcConnector;
-    const localStorageProfile = sessionStorage.getItem(
-      `${connector.wallet.address}_profile`
-    );
-    let profile: Record<string, string> = {};
-    if (localStorageProfile) {
-      try {
-        profile = JSON.parse(localStorageProfile);
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    setUser({
-      avatar: connector.user.avatar
-        ? `${AVATAR_BASE_URL}${connector.user.avatar}`
-        : "",
-      background: connector.user.background
-        ? `${AVATAR_BASE_URL}${connector.user.background}`
-        : "",
-      name: connector.user.name || profile.name,
-      metaid: connector.user.metaid,
-      bio: connector.user.bio || profile.bio || "",
-      address: connector.wallet.address,
-    });
+    await syncUserFromConnector(connector);
     localStorage.setItem("show_chain_v2", chain);
     setChain(chain);
   };
