@@ -1,4 +1,8 @@
 import { METAFS_API as BASE_MAN_URL } from "@/config";
+import {
+  getMetafilePinId,
+  stripMetafilePrefix,
+} from "@/utils/metafile";
 import { formatMessage } from "@/utils/utils";
 
 export enum FileType {
@@ -51,7 +55,7 @@ const ARCHIVE_EXTENSIONS = ["zip", "rar", "7z", "tar", "gz", "bz2"];
 export function getFileExtension(url: string): string {
   // 处理 metafile:// 格式
   if (url.startsWith("metafile://")) {
-    const path = url.replace("metafile://", "");
+    const path = stripMetafilePrefix(url);
     const parts = path.split(".");
     return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : "";
   }
@@ -72,13 +76,13 @@ export function getFileExtension(url: string): string {
  */
 export function getFileType(url: string): FileType {
   // 特殊处理：检查URL路径中的类型标识
-  if (url.includes("/video/")) {
+  if (url.includes("/video/") || url.startsWith("video/")) {
     return FileType.VIDEO;
   }
-  if (url.includes("/audio/")) {
+  if (url.includes("/audio/") || url.startsWith("audio/")) {
     return FileType.AUDIO;
   }
-  if (url.includes("/image/")) {
+  if (url.includes("/image/") || url.startsWith("image/")) {
     return FileType.IMAGE;
   }
 
@@ -120,7 +124,7 @@ export function getFileType(url: string): FileType {
 export function getFileUrl(url: string): string {
   // 如果是 metafile:// 格式，转换为 MAN URL
   if (url.startsWith("metafile://")) {
-    const fullPath = url.replace("metafile://", "");
+    const fullPath = stripMetafilePrefix(url);
 
     // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
     if (
@@ -134,6 +138,14 @@ export function getFileUrl(url: string): string {
 
     // 处理普通格式：metafile://pinId.ext
     return `${BASE_MAN_URL}/content/${fullPath}`;
+  }
+
+  if (
+    url.startsWith("video/") ||
+    url.startsWith("audio/") ||
+    url.startsWith("image/")
+  ) {
+    return `${BASE_MAN_URL}/content/${getMetafilePinId(url)}`;
   }
 
   // 如果是旧的 /video/ 格式，保持兼容
@@ -155,9 +167,8 @@ export function getFileUrl(url: string): string {
  * 从 URL 中提取 pinId
  */
 export function getPinId(url: string): string {
- 
   if (url.startsWith("metafile://")) {
-    const fullPath = url.replace("metafile://", "");
+    const fullPath = stripMetafilePrefix(url);
     // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
     if (
       fullPath.startsWith("video/") ||
@@ -172,6 +183,14 @@ export function getPinId(url: string): string {
 
     const parts = fullPath.split(".");
     return parts.length > 1 ? parts.slice(0, -1).join(".") : fullPath;
+  }
+
+  if (
+    url.startsWith("video/") ||
+    url.startsWith("audio/") ||
+    url.startsWith("image/")
+  ) {
+    return getMetafilePinId(url);
   }
 
   if (url.startsWith("/video/")) {
@@ -194,10 +213,18 @@ export function getPinId(url: string): string {
 export function getFileName(url: string): string {
   // 处理 metafile:// 格式
   if (url.startsWith("metafile://")) {
-    const path = url.replace("metafile://", "");
+    const path = stripMetafilePrefix(url);
     const parts = path.split(".");
     // 返回不含扩展名的部分
     return parts.length > 1 ? parts.slice(0, -1).join(".") : path;
+  }
+
+  if (
+    url.startsWith("video/") ||
+    url.startsWith("audio/") ||
+    url.startsWith("image/")
+  ) {
+    return getMetafilePinId(url);
   }
 
   // 处理普通 URL
@@ -403,7 +430,7 @@ export function getPreviewUrl(url: string): string {
 export function getDownloadUrl(url: string): string {
   // 如果是 metafile:// 格式，转换为不含扩展名的 MAN URL
   if (url.startsWith("metafile://")) {
-    const fullPath = url.replace("metafile://", "");
+    const fullPath = stripMetafilePrefix(url);
 
     // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
     if (
@@ -420,6 +447,14 @@ export function getDownloadUrl(url: string): string {
     const parts = fullPath.split(".");
     const pinId = parts.length > 1 ? parts.slice(0, -1).join(".") : fullPath;
     return `${BASE_MAN_URL}/content/${pinId}`;
+  }
+
+  if (
+    url.startsWith("video/") ||
+    url.startsWith("audio/") ||
+    url.startsWith("image/")
+  ) {
+    return `${BASE_MAN_URL}/content/${getMetafilePinId(url)}`;
   }
 
   // 如果是旧的 /video/ 格式，保持兼容

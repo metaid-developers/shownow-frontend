@@ -30,6 +30,7 @@ import {
 } from "@/request/api";
 import * as crypto from "crypto";
 import { isArray } from "lib/tool";
+import { normalizeVideoMetafileUri } from "@/utils/metafile";
 bitcoin.initEccLib(ecc);
 const ECPair = ECPairFactory(ecc);
 type PostParams = {
@@ -617,6 +618,10 @@ export const formatSimpleBuzz = async (parseSummary: {
     parseSummary.attachments = parseSummary.attachments[0];
   }
   for (let i = 0; i < (parseSummary.attachments ?? []).length; i++) {
+    parseSummary.attachments[i] = normalizeVideoMetafileUri(
+      parseSummary.attachments[i]
+    );
+
     if (parseSummary.attachments[i].startsWith("metafile://nft/mrc721/")) {
       const _nftId = parseSummary.attachments[i].split(
         "metafile://nft/mrc721/"
@@ -715,6 +720,10 @@ export const decodePayBuzz = async (
     const _publicFiles: string[] = [];
     const _nfts: API.NFT[] = [];
     for (let i = 0; i < parseSummary.publicFiles.length; i++) {
+      parseSummary.publicFiles[i] = normalizeVideoMetafileUri(
+        parseSummary.publicFiles[i]
+      );
+
       if (parseSummary.publicFiles[i].startsWith("metafile://nft/mrc721/")) {
         const _nftId = parseSummary.publicFiles[i].split(
           "metafile://nft/mrc721/"
@@ -729,6 +738,8 @@ export const decodePayBuzz = async (
             previewImage: parseSummary.publicFiles[i],
           });
         } catch (e) {}
+      } else if (parseSummary.publicFiles[i].startsWith("metafile://video/")) {
+        _publicFiles.push(parseSummary.publicFiles[i]);
       } else {
         if (parseSummary.publicFiles[i].startsWith("metafile://")) {
           parseSummary.publicFiles[i] =

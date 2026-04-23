@@ -15,6 +15,7 @@ assert.equal(isTypedMetafilePath("video/abc123i0"), true);
 assert.equal(isTypedMetafilePath("metafile://abc123i0.mp4"), false);
 
 assert.equal(getMetafilePinId("metafile://video/abc123i0"), "abc123i0");
+assert.equal(getMetafilePinId("video/abc123i0"), "abc123i0");
 assert.equal(getMetafilePinId("metafile://abc123i0.mp4"), "abc123i0");
 assert.equal(getMetafilePinId("abc123i0.mp4"), "abc123i0");
 
@@ -25,6 +26,10 @@ assert.equal(isVideoMetafileUri("metafile://abc123i0.jpg"), false);
 
 assert.equal(
   normalizeVideoMetafileUri("metafile://video/abc123i0"),
+  "metafile://video/abc123i0"
+);
+assert.equal(
+  normalizeVideoMetafileUri("video/abc123i0"),
   "metafile://video/abc123i0"
 );
 assert.equal(
