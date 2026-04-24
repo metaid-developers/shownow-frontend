@@ -1,5 +1,4 @@
-import { BASE_MAN_URL } from "@/config"
-import { getPinDetailByPid } from "@/request/api"
+import { METAFS_API } from "@/config"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback, useEffect, useRef, useState } from "react"
 import Plyr from "plyr-react";
@@ -44,14 +43,16 @@ export default ({ pid }: {
         queryKey: ['getPinDetailByPid', { pid }],
         enabled: !!pid,
         queryFn: () => {
-            return fetch(`${BASE_MAN_URL}/content/${pid}`).then(res => res.json())
+            return fetch(`${METAFS_API}/content/${pid}`).then(res => res.json())
         }
     });
     const _fetchChunksAndCombine = useCallback(async () => {
         setLoading(true)
         try {
             if (isIntersecting && metafile) {
-                const chunkUrls = (metafile as Metafile).chunkList.map(chunk => `${BASE_MAN_URL}/content/${chunk.pinId}`);
+                const chunkUrls = (metafile as Metafile).chunkList.map(
+                    (chunk) => `${METAFS_API}/content/${chunk.pinId}`
+                );
                 const src = await fetchChunksAndCombine(chunkUrls, metafile.dataType);
                 setVideoSrc(src)
             }

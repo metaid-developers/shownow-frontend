@@ -23,6 +23,7 @@ ShowNow is a decentralized social platform built on MetaID protocol, enabling us
 
 - [English Documentation](README-en.md)
 - [中文文档](README-zh.md)
+- [项目说明书](docs/project-manual.md)
 
 ## Quick Start
 
@@ -63,6 +64,7 @@ src/
 See detailed project structure in:
 - [English Version](README-en.md)
 - [Chinese Version](README-zh.md)
+- [Project Manual](docs/project-manual.md)
 
 ## Contributing
 

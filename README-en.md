@@ -1,5 +1,7 @@
 # ShowNow Project Structure
 
+For a detailed architecture and integration guide, see the [Project Manual](docs/project-manual.md).
+
 ```
 shownow-frontend/
 ├── Configuration Files

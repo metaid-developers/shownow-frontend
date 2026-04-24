@@ -3,9 +3,8 @@ import { Spin } from 'antd';
 import { useModel } from 'umi';
 import Plyr from 'plyr-react';
 import 'plyr-react/plyr.css';
-import { getDownloadUrl, getPinId } from './utils';
+import { getDownloadUrl } from './utils';
 import './video.less';
-import { BASE_MAN_URL, METAFS_API } from '@/config';
 
 interface VideoRendererProps {
     url: string;
@@ -55,13 +54,13 @@ const VideoRenderer: React.FC<VideoRendererProps> = ({
     const [loading, setLoading] = useState(false);
     const [isChunkedVideo, setIsChunkedVideo] = useState(false);
 
-    const pinId = getPinId(url);
-    console.log('VideoRenderer URL and pinId:', url, pinId);
+    console.log('VideoRenderer URL:', url);
 
     // 检查是否为分片视频
     const checkIfChunkedVideo = useCallback(async () => {
         try {
-            const response = await fetch(getDownloadUrl(url).replace(METAFS_API, BASE_MAN_URL));
+            const downloadUrl = getDownloadUrl(url);
+            const response = await fetch(downloadUrl);
             const contentType = response.headers.get('content-type') || '';
             console.log('Fetched content type:', contentType);
             // 如果是 JSON 响应，可能是分片视频的元数据
@@ -75,15 +74,15 @@ const VideoRenderer: React.FC<VideoRendererProps> = ({
 
             // 如果是普通视频文件，直接使用 URL
             if (contentType.includes('video/')) {
-                setVideoSrc(getDownloadUrl(url));
+                setVideoSrc(downloadUrl);
                 return null;
             }
 
             return null;
         } catch (error) {
             console.error('Error checking video type:', error);
-            // 如果检查失败，尝试直接使用 URL
-            setVideoSrc(url);
+            // 如果检查失败，回退到下载 URL（无扩展名 pinId）
+            setVideoSrc(getDownloadUrl(url));
             return null;
         }
     }, [url]);
@@ -95,8 +94,8 @@ const VideoRenderer: React.FC<VideoRendererProps> = ({
         try {
             const metafile = await checkIfChunkedVideo();
             if (metafile) {
-                const chunkUrls = metafile.chunkList.map(chunk =>
-                    url.replace(pinId, chunk.pinId).replace(METAFS_API, BASE_MAN_URL)
+                const chunkUrls = metafile.chunkList.map((chunk) =>
+                    getDownloadUrl(`metafile://${chunk.pinId}`)
                 );
                 const processedUrl = await fetchChunksAndCombine(chunkUrls, metafile.dataType);
                 setVideoSrc(processedUrl);
@@ -106,7 +105,7 @@ const VideoRenderer: React.FC<VideoRendererProps> = ({
         } finally {
             setLoading(false);
         }
-    }, [isIntersecting, isChunkedVideo, url, pinId, checkIfChunkedVideo]);
+    }, [isIntersecting, isChunkedVideo, checkIfChunkedVideo]);
 
     // 初始化检查视频类型
     useEffect(() => {

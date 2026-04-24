@@ -1,5 +1,7 @@
 # ShowNow 项目结构
 
+项目补充说明请参见：[项目说明书](docs/project-manual.md)
+
 ```
 shownow-frontend/
 ├── 配置文件
