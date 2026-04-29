@@ -5,8 +5,8 @@ import { useState } from "react"
 import { Button, Collapse, ConfigProvider, Empty, message, Segmented, Space, Spin, theme, Typography } from "antd"
 import { getUserNFTCollectionItems, getUserNFTCollections } from "@/request/api"
 import { useQuery } from "@tanstack/react-query"
-import { BASE_MAN_URL } from "@/config"
 import { CheckCircleOutlined, CheckOutlined } from "@ant-design/icons"
+import { getMetafileImagePreviewUrl } from "@/utils/metafileUrl"
 type Props = {
     show: boolean,
     onClose: () => void
@@ -36,7 +36,7 @@ export default ({ onClose, show, nfts, setNFTs }: Props) => {
                                 const img = JSON.parse(atob(nft.content)).attachment[0].content;
                                 return {
                                     ...nft,
-                                    previewImage: `${BASE_MAN_URL}/content/${img.replace('metafile://', '')}`
+                                    previewImage: getMetafileImagePreviewUrl(img)
                                 }
                             } catch (e) {
                                 return nft;

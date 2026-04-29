@@ -1,4 +1,3 @@
-import { METAFS_API } from "@/config"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback, useEffect, useRef, useState } from "react"
 import Plyr from "plyr-react";
@@ -6,6 +5,7 @@ import "plyr-react/plyr.css"
 import './video.less'
 import { useModel } from "umi";
 import { Spin } from "antd";
+import { getMetafileOriginalUrl } from "@/utils/metafileUrl";
 async function fetchChunksAndCombine(chunkUrls: string[], dataType: string) {
     const responses = await Promise.all(chunkUrls.map(url => fetch(url)));
     const arrays = await Promise.all(responses.map(response => response.arrayBuffer()));
@@ -43,7 +43,7 @@ export default ({ pid }: {
         queryKey: ['getPinDetailByPid', { pid }],
         enabled: !!pid,
         queryFn: () => {
-            return fetch(`${METAFS_API}/content/${pid}`).then(res => res.json())
+            return fetch(getMetafileOriginalUrl(pid)).then(res => res.json())
         }
     });
     const _fetchChunksAndCombine = useCallback(async () => {
@@ -51,7 +51,7 @@ export default ({ pid }: {
         try {
             if (isIntersecting && metafile) {
                 const chunkUrls = (metafile as Metafile).chunkList.map(
-                    (chunk) => `${METAFS_API}/content/${chunk.pinId}`
+                    (chunk) => getMetafileOriginalUrl(chunk.pinId)
                 );
                 const src = await fetchChunksAndCombine(chunkUrls, metafile.dataType);
                 setVideoSrc(src)

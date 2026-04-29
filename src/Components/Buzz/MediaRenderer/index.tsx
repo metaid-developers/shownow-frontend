@@ -4,7 +4,7 @@ import VideoRenderer from './VideoRenderer';
 import AudioRenderer from './AudioRenderer';
 import DocumentRenderer from './DocumentRenderer';
 import FileRenderer from './FileRenderer';
-import { FileType, getFileType, getFileUrl } from './utils';
+import { FileType, getFileType, getFileUrl, getPreviewUrl } from './utils';
 
 interface MediaRendererProps {
   url: string;
@@ -21,9 +21,8 @@ const MediaRenderer: React.FC<MediaRendererProps> = ({
   style,
   onClick,
 }) => {
-  // 处理 URL，支持旧格式和新格式
-  const processedUrl = getFileUrl(url);
   const fileType = getFileType(url);
+  const processedUrl = fileType === FileType.IMAGE ? getPreviewUrl(url) : getFileUrl(url);
 
   const commonProps = {
     url: processedUrl,

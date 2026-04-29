@@ -1,9 +1,10 @@
-import { AVATAR_BASE_URL, BASE_MAN_URL, FallbackImage } from "@/config";
+import { FallbackImage } from "@/config";
 import { LockOutlined } from "@ant-design/icons";
 import { Image, theme } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import './imageGallery.less'
 import { useLocation } from "umi";
+import { getDownloadUrl, getPreviewUrl } from "./MediaRenderer/utils";
 
 type Props = {
     decryptContent: {
@@ -78,9 +79,12 @@ export default ({ decryptContent }: Props) => {
                         return <Image
                             key={pid}
                             style={{ objectFit: 'cover', height: '100%', maxHeight: 400, display: index > 8 ? 'none' : 'block', borderRadius: borderRadiusLG, }}
-                            src={`${BASE_MAN_URL}/content/${(pid ?? '').replace('metafile://', '')}`}
+                            src={getPreviewUrl(pid)}
                             fallback={FallbackImage}
                             className="image-item"
+                            preview={{
+                                src: getDownloadUrl(pid),
+                            }}
 
                         />
                     })

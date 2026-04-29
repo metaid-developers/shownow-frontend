@@ -12,7 +12,8 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { fetchCurrentBuzzComments, fetchCurrentBuzzLikes, fetchFollowDetailPin, fetchFollowingList, getPinDetailByPid } from '@/request/api';
-import { BASE_MAN_URL, curNetwork, FLAG } from '@/config';
+import { curNetwork, FLAG } from '@/config';
+import { getMetafileImagePreviewUrl, getMetafileOriginalUrl } from '@/utils/metafileUrl';
 import { Avatar, message } from 'antd';
 
 
@@ -153,7 +154,7 @@ const BuzzCard = ({
               objectFit: 'cover',
               objectPosition: 'center',
             }}
-            src={`${BASE_MAN_URL}/content/${pinIds[0]}`}
+            src={getMetafileImagePreviewUrl(pinIds[0])}
             alt=''
             key={pinIds[0]}
           />
@@ -177,7 +178,7 @@ const BuzzCard = ({
                   width: '100%',
                   height: '100%',
                 }}
-                src={`${BASE_MAN_URL}/content/${pinIds[0]}`}
+                src={getMetafileOriginalUrl(pinIds[0])}
                 alt=''
               />
             </div>
@@ -206,7 +207,7 @@ const BuzzCard = ({
                     width: '250px',
                     height: '250px',
                   }}
-                  src={`${BASE_MAN_URL}/content/${pinId}`}
+                  src={getMetafileImagePreviewUrl(pinId)}
                   alt=''
                   key={pinId}
                 />
@@ -229,7 +230,7 @@ const BuzzCard = ({
                         width: '100%',
                         height: '100%',
                       }}
-                      src={`${BASE_MAN_URL}/content/${pinId}`}
+                      src={getMetafileOriginalUrl(pinId)}
                       alt=''
                     />
                   </div>

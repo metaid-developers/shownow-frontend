@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Image, theme } from 'antd';
 import { useLocation } from 'umi';
 import MediaRenderer from './MediaRenderer';
-import { getFileType, FileType, getDownloadUrl } from './MediaRenderer/utils';
-import { BASE_MAN_URL, FallbackImage } from '@/config';
+import { getFileType, FileType, getDownloadUrl, getPreviewUrl } from './MediaRenderer/utils';
+import { FallbackImage } from '@/config';
 import './imageGallery.less';
 
 type Props = {
@@ -102,9 +102,8 @@ export default ({ decryptContent }: Props) => {
       );
     }
 
-    // 处理普通图片文件
-    // 使用getDownloadUrl去除扩展名，保持与MediaRenderer一致的URL处理
-    const imageUrl = getDownloadUrl(file);
+    const imageUrl = getPreviewUrl(file);
+    const originalUrl = getDownloadUrl(file);
     return (
       <Image
         key={`public-${index}`}
@@ -118,6 +117,9 @@ export default ({ decryptContent }: Props) => {
         src={imageUrl}
         fallback={FallbackImage}
         className="image-item"
+        preview={{
+          src: originalUrl,
+        }}
       />
     );
   };
