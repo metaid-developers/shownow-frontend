@@ -1,7 +1,6 @@
-// 测试下载URL去除扩展名功能
+// 测试原文件URL生成功能
 import { getDownloadUrl } from './utils';
 
-// 模拟BASE_MAN_URL (需要根据实际配置修改)
 console.log('下载URL测试:');
 
 // 测试用例1: metafile://带PDF扩展名
@@ -33,6 +32,6 @@ const testUrl4 = 'metafile://abc123i0';
 const result4 = getDownloadUrl(testUrl4);
 console.log('输入:', testUrl4);
 console.log('输出:', result4);
-console.log('应该保持不变');
+console.log('应该生成 accelerate 原文件URL');
 
 export default {};

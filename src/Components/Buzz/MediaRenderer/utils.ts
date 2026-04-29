@@ -1,8 +1,12 @@
-import { METAFS_API as BASE_MAN_URL } from "@/config";
 import {
   getMetafilePinId,
   stripMetafilePrefix,
 } from "@/utils/metafile";
+import {
+  getMetafileImagePreviewUrl,
+  getMetafileOriginalUrl,
+  getMetafilePinIdFromSource,
+} from "@/utils/metafileUrl";
 import { formatMessage } from "@/utils/utils";
 
 export enum FileType {
@@ -61,14 +65,19 @@ export function getFileExtension(url: string): string {
   }
 
   // 处理普通 URL
-  const parts = url.split(".");
-  if (parts.length > 1) {
-    const ext = parts[parts.length - 1].toLowerCase();
-    // 移除可能的查询参数
-    return ext.split("?")[0].split("#")[0];
+  let path = url;
+  try {
+    if (/^https?:\/\//i.test(url)) {
+      path = new URL(url).pathname;
+    }
+  } catch (error) {
+    path = url;
   }
 
-  return "";
+  const cleanPath = path.split(/[?#]/)[0];
+  const lastSegment = cleanPath.split("/").pop() || cleanPath;
+  const dotIndex = lastSegment.lastIndexOf(".");
+  return dotIndex > 0 ? lastSegment.slice(dotIndex + 1).toLowerCase() : "";
 }
 
 /**
@@ -122,51 +131,18 @@ export function getFileType(url: string): FileType {
  * 新格式：metafile://{pinId}.{文件类型}
  */
 export function getFileUrl(url: string): string {
-  // 如果是 metafile:// 格式，转换为 MAN URL
-  if (url.startsWith("metafile://")) {
-    const fullPath = stripMetafilePrefix(url);
-
-    // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
-    if (
-      fullPath.startsWith("video/") ||
-      fullPath.startsWith("audio/") ||
-      fullPath.startsWith("image/")
-    ) {
-      const pinId = fullPath.split("/")[1]; // 获取 / 后面的 pinId
-      return `${BASE_MAN_URL}/content/${pinId}`;
-    }
-
-    // 处理普通格式：metafile://pinId.ext
-    return `${BASE_MAN_URL}/content/${fullPath}`;
-  }
-
-  if (
-    url.startsWith("video/") ||
-    url.startsWith("audio/") ||
-    url.startsWith("image/")
-  ) {
-    return `${BASE_MAN_URL}/content/${getMetafilePinId(url)}`;
-  }
-
-  // 如果是旧的 /video/ 格式，保持兼容
-  if (url.startsWith("/video/")) {
-    const pinId = url.replace("/video/", "");
-    return `${BASE_MAN_URL}/content/${pinId}`;
-  }
-
-  // 如果已经是完整 URL，直接返回
-  if (url.startsWith("http")) {
-    return url;
-  }
-
-  // 其他情况，当作 pinId 处理
-  return `${BASE_MAN_URL}/content/${url}`;
+  return getMetafileOriginalUrl(url);
 }
 
 /**
  * 从 URL 中提取 pinId
  */
 export function getPinId(url: string): string {
+  const metafilePinId = getMetafilePinIdFromSource(url);
+  if (metafilePinId) {
+    return metafilePinId;
+  }
+
   if (url.startsWith("metafile://")) {
     const fullPath = stripMetafilePrefix(url);
     // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
@@ -416,116 +392,17 @@ export function getMimeType(extension: string): string {
 }
 
 /**
- * 获取预览URL（保留扩展名）
- * 预览时保留扩展名，让服务器能正确识别文件类型并设置Content-Type
+ * 获取图片缩略预览 URL。
  */
 export function getPreviewUrl(url: string): string {
-  return getFileUrl(url); // 预览时使用原始带扩展名的URL
+  return getMetafileImagePreviewUrl(url);
 }
 
 /**
- * 获取下载URL（不含扩展名）
- * 下载时使用的URL应该去除文件扩展名
+ * 获取原文件 URL，用于图片大图、视频、音频、文档和下载。
  */
 export function getDownloadUrl(url: string): string {
-  // 如果是 metafile:// 格式，转换为不含扩展名的 MAN URL
-  if (url.startsWith("metafile://")) {
-    const fullPath = stripMetafilePrefix(url);
-
-    // 处理特殊格式：metafile://video/pinId, metafile://audio/pinId 等
-    if (
-      fullPath.startsWith("video/") ||
-      fullPath.startsWith("audio/") ||
-      fullPath.startsWith("image/")
-    ) {
-      const pinId = fullPath.split("/")[1]; // 获取 / 后面的 pinId
-      return `${BASE_MAN_URL}/content/${pinId}`;
-    }
-
-    // 处理普通格式：metafile://pinId.ext
-    // 移除文件扩展名，获取纯 pinId
-    const parts = fullPath.split(".");
-    const pinId = parts.length > 1 ? parts.slice(0, -1).join(".") : fullPath;
-    return `${BASE_MAN_URL}/content/${pinId}`;
-  }
-
-  if (
-    url.startsWith("video/") ||
-    url.startsWith("audio/") ||
-    url.startsWith("image/")
-  ) {
-    return `${BASE_MAN_URL}/content/${getMetafilePinId(url)}`;
-  }
-
-  // 如果是旧的 /video/ 格式，保持兼容
-  if (url.startsWith("/video/")) {
-    const pinId = url.replace("/video/", "");
-    return `https://file.metaid.io/metafile-indexer/api/v1/files/content/${pinId}`;
-  }
-
-  // 如果已经是完整 URL，需要移除扩展名
-  if (url.startsWith("http")) {
-    // 先检查URL的路径部分是否包含扩展名
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const pathParts = pathname.split("/");
-      const lastPart = pathParts[pathParts.length - 1];
-
-      // 检查最后一部分是否包含扩展名
-      const dotIndex = lastPart.lastIndexOf(".");
-      if (dotIndex > 0) {
-        const extension = lastPart.substring(dotIndex + 1);
-        // 检查是否是有效的文件扩展名（长度小于5且只包含字母数字）
-        if (extension.length <= 4 && /^[a-zA-Z0-9]+$/.test(extension)) {
-          // 移除扩展名
-          const nameWithoutExt = lastPart.substring(0, dotIndex);
-          pathParts[pathParts.length - 1] = nameWithoutExt;
-          urlObj.pathname = pathParts.join("/");
-          const newUrl = urlObj.toString();
-          return newUrl;
-        }
-      }
-    } catch (e) {
-      // 如果URL解析失败，使用字符串方法
-      console.warn("Failed to parse URL, using string method:", e);
-    }
-
-    // 备用方法：使用字符串处理
-    const urlParts = url.split(".");
-    if (urlParts.length > 1) {
-      const lastPart = urlParts[urlParts.length - 1];
-      // 检查最后一部分是否是文件扩展名（长度小于5且不包含特殊字符）
-      if (lastPart.length <= 4 && /^[a-zA-Z0-9]+(\?.*|#.*)?$/.test(lastPart)) {
-        // 移除扩展名，但保留可能的查询参数
-        const extensionWithParams = lastPart.split(/[?#]/);
-        if (extensionWithParams[0].length <= 4) {
-          return (
-            urlParts.slice(0, -1).join(".") +
-            (extensionWithParams.length > 1
-              ? "?" + lastPart.split("?").slice(1).join("?")
-              : "")
-          );
-        }
-      }
-    }
-    return url;
-  }
-
-  // 其他情况，当作 pinId 处理，需要移除可能的扩展名
-  if (url.includes(".")) {
-    const parts = url.split(".");
-    if (parts.length > 1) {
-      const extension = parts[parts.length - 1];
-      // 检查是否是有效的文件扩展名（长度小于5且只包含字母数字）
-      if (extension.length <= 4 && /^[a-zA-Z0-9]+$/.test(extension)) {
-        // 移除扩展名
-        const fileNameWithoutExt = parts.slice(0, -1).join(".");
-        return `${BASE_MAN_URL}/content/${fileNameWithoutExt}`;
-      }
-    }
-  }
-  return `${BASE_MAN_URL}/content/${url}`;
+  return getMetafileOriginalUrl(url);
 }
 
 /**

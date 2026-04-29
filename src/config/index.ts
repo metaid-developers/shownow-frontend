@@ -1,10 +1,11 @@
 import _logo from "@/assets/dashboard/logo.svg";
 import { networks, type Network } from "bitcoinjs-lib";
 import defaultAvatar from "@/assets/defaultAvatar.svg";
+import { METAFILE_FILES_API } from "@/utils/metafileUrl";
 const TESTNET_CONTENT_HOST = "https://man-test.metaid.io";
 const MAINNET_CONTENT_HOST = "https://man.metaid.io";
 export const MAINNET_MAN_HOST_V1 = "https://v1man.metaid.io";
-export const METAFS_API = "https://file.metaid.io/metafile-indexer/api/v1/files";
+export const METAFS_API = METAFILE_FILES_API;
 export const METAFS_INDEXER_API="https://file.metaid.io/metafile-indexer/api/v1"
 
 export const getHostByNet = (network: API.Network) => {

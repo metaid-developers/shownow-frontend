@@ -1,4 +1,5 @@
-import { BASE_MAN_URL, FallbackImage } from "@/config"
+import { FallbackImage } from "@/config"
+import { getMetafileImagePreviewUrl } from "@/utils/metafileUrl"
 import { FlagFilled } from "@ant-design/icons"
 import { Image, Space, Tag, theme, Typography } from "antd"
 
@@ -17,7 +18,7 @@ export default ({ nfts }: Props) => {
                 return <div key={index} className="nft-item" style={{ background: colorBgLayout, borderRadius: borderRadiusLG, padding, display: 'flex', width: 378, gap: 10, maxWidth: '100%' }}>
                     <Image
                         style={{ objectFit: 'cover', height: 80, width: 80, display: index > 8 ? 'none' : 'block', borderRadius: borderRadiusLG }}
-                        src={`${BASE_MAN_URL}/content/${(nft.previewImage ?? '').replace('metafile://', '')}`}
+                        src={getMetafileImagePreviewUrl(nft.previewImage ?? '')}
                         fallback={FallbackImage}
                         className="image-item"
                         preview={false}

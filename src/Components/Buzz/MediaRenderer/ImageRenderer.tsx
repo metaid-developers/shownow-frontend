@@ -1,9 +1,11 @@
 import React from 'react';
 import { Image } from 'antd';
 import { FallbackImage } from '@/config';
+import { getDownloadUrl } from './utils';
 
 interface ImageRendererProps {
   url: string;
+  originalUrl?: string;
   alt?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -12,6 +14,7 @@ interface ImageRendererProps {
 
 const ImageRenderer: React.FC<ImageRendererProps> = ({
   url,
+  originalUrl,
   alt,
   className,
   style,
@@ -34,6 +37,7 @@ const ImageRenderer: React.FC<ImageRendererProps> = ({
       onClick={onClick}
       preview={{
         mask: false,
+        src: getDownloadUrl(originalUrl || url),
       }}
     />
   );
