@@ -12,6 +12,7 @@ import {
 } from "@/config";
 import { PayBuzz, SimpleBuzz } from "@/utils/buzz";
 import { Notification } from "@/utils/NotificationStore";
+import { normalizeUserInfo } from "@/utils/userProfile";
 import { IBtcConnector } from "@metaid/metaid";
 import axios from "axios";
 import { number } from "bitcoinjs-lib/src/script";
@@ -490,10 +491,7 @@ export const getUserInfo = async (params: { address: string }) => {
     method: "GET",
   });
   
-  if(ret.data){
-    ret.data.metaid=ret.data.metaId
-  }
-  return ret.data ?? undefined;
+  return normalizeUserInfo(ret.data) ?? undefined;
 };
 
 // export const getUserInfo = async (params: { address: string }) => {

@@ -49,6 +49,12 @@ export default ({ address, IDCoin }: Props) => {
                 params: { cursor: '0', size: '100', followDetail: false },
             }),
     });
+    const profileUser = profileUserData?.data;
+    const globalMetaId = profileUser?.globalMetaId || '';
+    const metaid = profileUser?.metaid || '';
+    const shortGlobalMetaId = globalMetaId ? globalMetaId.slice(0, 12) : '-';
+    const shortMetaid = metaid ? metaid.slice(0, 8) : '-';
+
     return (
         <Card style={{ padding: 0 }} styles={{ body: { padding: 0 } }} variant='borderless' cover={
             <div
@@ -74,14 +80,17 @@ export default ({ address, IDCoin }: Props) => {
 
 
                     <div style={{ marginTop: 10 }}>
-                        <h3>{profileUserData?.data?.name}</h3>
-                        <p>MetaID: <Typography.Link copyable={{
-                            text: profileUserData?.data?.metaid,
-                        }}
+                        <h3>{profileUser?.name}</h3>
+                        <p>GlobalMetaID: <Typography.Text copyable={globalMetaId ? {
+                            text: globalMetaId,
+                        } : false}>{shortGlobalMetaId}</Typography.Text></p>
+                        <p>MetaID: <Typography.Link copyable={metaid ? {
+                            text: metaid,
+                        } : false}
                             target="_blank"
                             underline
-                            href={`${curNetwork === 'mainnet' ? 'https://metaid.io/' : 'https://metaid-testnet.vercel.app/'}metaid-detail/${profileUserData?.data?.metaid}`}
-                        >{profileUserData?.data?.metaid.slice(0, 8)}</Typography.Link></p>
+                            href={metaid ? `${curNetwork === 'mainnet' ? 'https://metaid.io/' : 'https://metaid-testnet.vercel.app/'}metaid-detail/${metaid}` : undefined}
+                        >{shortMetaid}</Typography.Link></p>
                         <p>Address: <Typography.Text copyable={{
                             text: address,
                         }}>{address.slice(0, 8)}</Typography.Text></p>
