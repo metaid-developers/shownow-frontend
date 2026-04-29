@@ -4,7 +4,7 @@ import Trans from "../Trans";
 import { Button, Card, Divider, Input, message, Typography } from "antd";
 import PendingUser from "../UserInfo/PendingUser";
 import { getBuzzSchemaWithCustomHost } from "@/entities/buzz";
-import { IMvcEntity } from "@feiyangl1020/metaid";
+import type { IMvcEntity } from "@feiyangl1020/metaid";
 import { ASSIST_ENDPOINT, curNetwork } from "@/config";
 import { useState } from "react";
 import { isNil } from "lodash";

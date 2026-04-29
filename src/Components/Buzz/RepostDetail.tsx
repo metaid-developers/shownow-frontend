@@ -32,10 +32,9 @@ import { isEmpty, isNil } from "ramda";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useModel, history, useIntl } from "umi";
 import Comment from "../Comment";
-import NewPost from "../NewPost";
 import "./index.less";
 import ForwardTweet from "./ForwardTweet";
-import { IMvcEntity } from "@metaid/metaid";
+import type { IMvcEntity } from "@metaid/metaid";
 import { FollowIconComponent } from "../Follow";
 import dayjs from "dayjs";
 import { buildAccessPass, buildMRc20AccessPass, decodePayBuzz } from "@/utils/buzz";
@@ -99,7 +98,6 @@ export default ({
     const [isTranslating, setIsTranslating] = useState(false);
     const [showTrans, setShowTrans] = useState(false);
     const [transResult, setTransResult] = useState<string[]>([]);
-    const [showNewPost, setShowNewPost] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null); // 引用内容容器
     const [paying, setPaying] = useState(false);
     const {

@@ -8,7 +8,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import NewPost from '@/Components/NewPost';
 import Mobilefooter from './Mobilefooter';
 import _btc from '@/assets/btc.png'
 import _mvc from '@/assets/mvc.png'
@@ -62,8 +61,6 @@ export default function LoginLayout() {
     }
 
   }, [showConf])
-
-  const [showPost, setShowPost] = useState(false)
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -10,12 +10,13 @@ import { GiftOutlined, HeartFilled, HeartOutlined, LinkOutlined, MessageOutlined
 import { curNetwork, FLAG } from "@/config";
 import dayjs from "dayjs";
 import { formatMessage, getEffectiveBTCFeerate } from "@/utils/utils";
-import { useMemo, useState } from "react";
-import { IMvcEntity } from "@feiyangl1020/metaid";
+import { lazy, Suspense, useMemo, useState } from "react";
+import type { IMvcEntity } from "@feiyangl1020/metaid";
 import Comment from "../Comment";
 import Donate from "../Donate";
-import NewPost from "../NewPost";
 import Popup from "../ResponPopup";
+
+const NewPost = lazy(() => import("../NewPost"));
 
 type CommentPanelProps = {
     tweetId: string,
@@ -393,13 +394,15 @@ export const CommentItem = ({ item, level }: { item: API.CommentRes, level: numb
             setDonateCount(donateCount + 1);
         }} />
 
-        <NewPost
-            show={showNewPost}
-            onClose={() => {
-                setShowNewPost(false);
-            }}
-            quoteComment={item}
-        />
+        {showNewPost && <Suspense fallback={null}>
+            <NewPost
+                show={showNewPost}
+                onClose={() => {
+                    setShowNewPost(false);
+                }}
+                quoteComment={item}
+            />
+        </Suspense>}
 
     </div>
 }

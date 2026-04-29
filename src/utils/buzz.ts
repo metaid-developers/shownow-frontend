@@ -1,4 +1,4 @@
-import {
+import type {
   CreateOptions,
   IMvcConnector,
   IMvcEntity,
@@ -13,8 +13,8 @@ import {
   sleep,
 } from "./utils";
 import { curNetwork, FLAG } from "@/config";
-import { IBtcConnector } from "@feiyangl1020/metaid";
-import { InscribeData } from "@feiyangl1020/metaid/src/core/entity/btc";
+import type { IBtcConnector } from "@feiyangl1020/metaid";
+import type { InscribeData } from "@feiyangl1020/metaid/src/core/entity/btc";
 import Decimal from "decimal.js";
 import * as ecc from "@bitcoin-js/tiny-secp256k1-asmjs";
 import ECPairFactory, { ECPairInterface, SignerAsync } from "ecpair";

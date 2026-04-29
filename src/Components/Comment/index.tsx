@@ -4,14 +4,15 @@ import Popup from "../ResponPopup"
 import UserInfo from "../UserInfo"
 import { Button, Input, message, Space } from "antd";
 import { FileImageOutlined, SmileOutlined, VideoCameraOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { curNetwork, FLAG } from "@/config";
 import { isNil } from "ramda";
 import { useQueryClient } from "@tanstack/react-query";
 import commentEntitySchema, { getCommentEntitySchemaWithCustomHost } from "@/entities/comment";
 import { formatMessage, getEffectiveBTCFeerate, sleep } from "@/utils/utils";
 import Trans from "../Trans";
-import EmojiPicker from "emoji-picker-react";
+const EmojiPicker = lazy(() => import("emoji-picker-react"));
+
 const { TextArea } = Input;
 type Props = {
     show: boolean,
@@ -148,16 +149,18 @@ export default ({ show, onClose, tweetId }: Props) => {
                 </div>
             </div>
         </Popup>
-        <Popup onClose={() => {
+        {showEmojiPicker && <Popup onClose={() => {
             setShowEmojiPicker(false);
         }} show={
             showEmojiPicker
         } closable title={<Trans>Select Emoji</Trans>}>
-            <EmojiPicker
-                onEmojiClick={(emoji) => {
-                    setContent((prev: string) => prev + emoji.emoji);
-                }}
-            />
-        </Popup>
+            <Suspense fallback={null}>
+                <EmojiPicker
+                    onEmojiClick={(emoji) => {
+                        setContent((prev: string) => prev + emoji.emoji);
+                    }}
+                />
+            </Suspense>
+        </Popup>}
     </>
 }

@@ -13,10 +13,9 @@ import {
 import { PayBuzz, SimpleBuzz } from "@/utils/buzz";
 import { Notification } from "@/utils/NotificationStore";
 import { normalizeUserInfo } from "@/utils/userProfile";
-import { IBtcConnector } from "@metaid/metaid";
+import type { IBtcConnector } from "@metaid/metaid";
 import axios from "axios";
-import { number } from "bitcoinjs-lib/src/script";
-import { UserInfo,UserInfoByMs } from "node_modules/@metaid/metaid/dist/types";
+import type { UserInfo, UserInfoByMs } from "@metaid/metaid/dist/types";
 import { request } from "umi";
 export type BtcNetwork = "mainnet" | "testnet" | "regtest";
 

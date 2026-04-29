@@ -74,7 +74,7 @@ export default defineConfig({
   outputPath: "../shownow-backend/public",
   // process.env.BUILD_ENV === "docker" ? "../server-shownow/public" : "dist",
   esbuildMinifyIIFE: true,
-  jsMinifier: "none",
+  jsMinifier: "terser",
   favicons: ["/ico/favicon.ico", "/favicon.ico"],
   title: "MetaSo",
   define: {

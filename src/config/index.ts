@@ -1,5 +1,5 @@
 import _logo from "@/assets/dashboard/logo.svg";
-import { networks, type Network } from "bitcoinjs-lib";
+import type { Network } from "bitcoinjs-lib";
 import defaultAvatar from "@/assets/defaultAvatar.svg";
 import { METAFILE_FILES_API } from "@/utils/metafileUrl";
 const TESTNET_CONTENT_HOST = "https://man-test.metaid.io";
@@ -24,8 +24,32 @@ export const curNetwork: API.Network =
 export const AVATAR_BASE_URL =
   curNetwork === "testnet" ? TESTNET_CONTENT_HOST : MAINNET_CONTENT_HOST;
 
+const BITCOIN_NETWORK: Network = {
+  messagePrefix: "\x18Bitcoin Signed Message:\n",
+  bech32: "bc",
+  bip32: {
+    public: 0x0488b21e,
+    private: 0x0488ade4,
+  },
+  pubKeyHash: 0x00,
+  scriptHash: 0x05,
+  wif: 0x80,
+};
+
+const TESTNET_NETWORK: Network = {
+  messagePrefix: "\x18Bitcoin Signed Message:\n",
+  bech32: "tb",
+  bip32: {
+    public: 0x043587cf,
+    private: 0x04358394,
+  },
+  pubKeyHash: 0x6f,
+  scriptHash: 0xc4,
+  wif: 0xef,
+};
+
 export const TYPED_NETWORK: Network =
-  curNetwork === "testnet" ? networks.testnet : networks.bitcoin;
+  curNetwork === "testnet" ? TESTNET_NETWORK : BITCOIN_NETWORK;
 
 export const METASO_BASE_API =
   curNetwork === "testnet"

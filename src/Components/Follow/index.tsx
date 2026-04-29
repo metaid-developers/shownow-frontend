@@ -4,7 +4,7 @@ import { fetchFollowDetailPin } from '@/request/api';
 import { formatMessage, getEffectiveBTCFeerate, sleep } from '@/utils/utils';
 import { CheckCircleFilled, LoadingOutlined, PlusCircleFilled } from '@ant-design/icons';
 import { Button, message, theme } from 'antd';
-import { MvcEntity } from 'node_modules/@feiyangl1020/metaid/dist/core/entity/mvc';
+import type { MvcEntity } from '@feiyangl1020/metaid/dist/core/entity/mvc';
 import { isNil } from 'ramda';
 import React, { useMemo, useState } from 'react';
 import { useModel } from 'umi';

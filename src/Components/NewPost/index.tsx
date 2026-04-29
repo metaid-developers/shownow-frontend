@@ -4,9 +4,9 @@ import Popup from "../ResponPopup"
 import UserInfo from "../UserInfo"
 import { Avatar, Button, Card, Checkbox, Col, Divider, GetProp, Input, InputNumber, Mentions, message, Radio, Result, Row, Segmented, Select, Space, Tag, Typography, Upload, UploadFile, UploadProps } from "antd";
 import { CheckCircleOutlined, CloseOutlined, ExclamationCircleOutlined, FileImageOutlined, FileTextOutlined, LoadingOutlined, LockOutlined, SmileOutlined, UnlockOutlined, VideoCameraOutlined } from "@ant-design/icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { AttachmentItem, convertToFileList, image2Attach, processFile } from "@/utils/file";
-import { CreateOptions, IBtcEntity, IMvcEntity, MvcTransaction } from "@feiyangl1020/metaid";
+import type { CreateOptions, IBtcEntity, IMvcEntity, MvcTransaction } from "@feiyangl1020/metaid";
 import { isEmpty, isNil, set } from "ramda";
 import { ASSIST_ENDPOINT, BASE_MAN_URL, curNetwork, FLAG } from "@/config";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,14 +14,12 @@ import BuzzCard from "../Cards/BuzzCard";
 import Buzz from "../Buzz";
 import _btc from '@/assets/btc.png'
 import _mvc from '@/assets/mvc.png'
-import { InscribeData } from "node_modules/@metaid/metaid/dist/core/entity/btc";
-import * as crypto from 'crypto'
+import type { InscribeData } from "@metaid/metaid/dist/core/entity/btc";
 import { checkImageSize, encryptPayloadAES, formatMessage, generateAESKey, getEffectiveBTCFeerate, openWindowTarget, sleep } from "@/utils/utils";
 import { postPayBuzz, postVideo } from "@/utils/buzz";
 import { getDeployList, getMRC20Info, getUserInfo } from "@/request/api";
 import UserAvatar from "../UserAvatar";
 import Trans from "../Trans";
-import NFTModal from "../NFTModal";
 import SelectChain from "./SelectChain";
 import { getBuzzSchemaWithCustomHost } from "@/entities/buzz";
 import { v4 as uuidv4 } from 'uuid';
@@ -30,9 +28,12 @@ import MRC20Icon from "../MRC20Icon";
 import debounce from 'lodash/debounce';
 import { fetchIDCoinInfo } from "@/request/metaso";
 import PendingUserAvatar from "../UserInfo/PendingUserAvatar";
-import EmojiPicker from 'emoji-picker-react';
 import idCoinStore, { IDCoin } from "@/utils/IDCoinStore";
 import CommentPanel, { CommentItem } from "../CommentPanel";
+
+const EmojiPicker = lazy(() => import("emoji-picker-react"));
+const NFTModal = lazy(() => import("../NFTModal"));
+
 const { TextArea } = Input;
 type Props = {
     show: boolean,
@@ -1292,24 +1293,28 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
 
             </div>
         </div>
-        <NFTModal show={showNFTModal} onClose={() => { setShowNFTModal(false) }} nfts={nfts} setNFTs={setNFTs} />
+        {showNFTModal && <Suspense fallback={null}>
+            <NFTModal show={showNFTModal} onClose={() => { setShowNFTModal(false) }} nfts={nfts} setNFTs={setNFTs} />
+        </Suspense>}
 
-        <Popup onClose={() => {
+        {showEmojiPicker && <Popup onClose={() => {
             setShowEmojiPicker(false);
         }} show={
             showEmojiPicker
         } closable title={<Trans>Select Emoji</Trans>}>
-            <EmojiPicker
-                onEmojiClick={(emoji) => {
-                    if (lock && lastFocus === 'decrypt') {
-                        setEncryptContent((prev: string) => prev + emoji.emoji);
-                    } else {
-                        setContent((prev: string) => prev + emoji.emoji);
-                    }
+            <Suspense fallback={null}>
+                <EmojiPicker
+                    onEmojiClick={(emoji) => {
+                        if (lock && lastFocus === 'decrypt') {
+                            setEncryptContent((prev: string) => prev + emoji.emoji);
+                        } else {
+                            setContent((prev: string) => prev + emoji.emoji);
+                        }
 
-                }}
-            />
-        </Popup>
+                    }}
+                />
+            </Suspense>
+        </Popup>}
 
     </Popup>
 }

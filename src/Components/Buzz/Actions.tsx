@@ -1,14 +1,15 @@
 import { curNetwork, FLAG } from "@/config";
 import { formatMessage, getEffectiveBTCFeerate } from "@/utils/utils";
 import { GiftFilled, GiftOutlined, HeartFilled, HeartOutlined, MessageOutlined, UploadOutlined } from "@ant-design/icons";
-import { IMvcEntity } from "@feiyangl1020/metaid";
+import type { IMvcEntity } from "@feiyangl1020/metaid";
 import { Button, message, theme } from "antd";
 import { isNil } from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useModel } from "umi";
 import Donate from "../Donate";
 import Comment from "../Comment";
-import NewPost from "../NewPost";
+
+const NewPost = lazy(() => import("../NewPost"));
 
 type Props = {
     buzzItem: API.Buzz;
@@ -218,13 +219,15 @@ export default ({ buzzItem, like = [], donate = [] }: Props) => {
             }}
             show={showComment}
         />
-        <NewPost
-            show={showNewPost}
-            onClose={() => {
-                setShowNewPost(false);
-            }}
-            quotePin={buzzItem}
-        />
+        {showNewPost && <Suspense fallback={null}>
+            <NewPost
+                show={showNewPost}
+                onClose={() => {
+                    setShowNewPost(false);
+                }}
+                quotePin={buzzItem}
+            />
+        </Suspense>}
         <Donate donateAddress={buzzItem.creator} show={showGift} onClose={() => setShowGift(false)} pinId={buzzItem.id} callback={() => {
             setDonateCount(donateCount + 1);
         }} />

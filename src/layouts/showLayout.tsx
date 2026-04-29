@@ -1,6 +1,6 @@
 import { Link, Outlet, useModel, history, useIntl, useLocation, useOutlet } from 'umi';
 import { Button, Col, ConfigProvider, Divider, Dropdown, FloatButton, Grid, Input, InputNumber, Layout, Menu, message, notification, Radio, Row, Segmented, Space, Tag, theme, Typography } from 'antd';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './index.less';
 import Menus from './Menus';
 import { CaretDownOutlined, EditOutlined, EllipsisOutlined, LoginOutlined, PoweroffOutlined, ProjectOutlined, SearchOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
@@ -9,7 +9,6 @@ import {
     QueryClientProvider,
     useQueryClient,
 } from '@tanstack/react-query'
-import NewPost from '@/Components/NewPost';
 import Mobilefooter from './Mobilefooter';
 import _btc from '@/assets/btc.png'
 import _mvc from '@/assets/mvc.png'
@@ -30,6 +29,8 @@ import { LockKeyhole, LockKeyholeOpen } from 'lucide-react';
 import RecommendFollow from '@/Components/ProfileSetting/RecommendFollow';
 import FirstPost from '@/Components/ProfileSetting/FirstPost';
 import InstallModal from '@/Components/InstallModal';
+
+const NewPost = lazy(() => import('@/Components/NewPost'));
 
 
 
@@ -452,10 +453,12 @@ export default function ShowLayout({ children, _showConf }: { children?: React.R
                     {!md && showConf?.showSliderMenu ? <Footer className='footer' style={{ background: colorBgContainer }}><Mobilefooter /></Footer> : ''}
                 </Layout>
 
-                <NewPost show={showPost} onClose={() => {
+                {showPost && <Suspense fallback={null}>
+                    <NewPost show={showPost} onClose={() => {
 
-                    setShowPost(false)
-                }} />
+                        setShowPost(false)
+                    }} />
+                </Suspense>}
                 {
                     (!md || !showConf?.showSliderMenu) && <FloatButton style={{ bottom: 100 }} icon={<EditOutlined />} onClick={() => {
                         if (!isLogin) {

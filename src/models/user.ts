@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-  IMvcConnector,
-  MetaletWalletForBtc,
-  MetaletWalletForMvc,
-  mvcConnect,
-  IBtcConnector,
-  btcConnect,
-} from "@feiyangl1020/metaid";
+import type { IBtcConnector, IMvcConnector } from "@feiyangl1020/metaid";
 
 import {
   AVATAR_BASE_URL,
@@ -29,8 +22,11 @@ import useIntervalAsync from "@/hooks/useIntervalAsync";
 import { add, isEmpty, set } from "ramda";
 import { useModel } from "umi";
 import { NotificationStore } from "@/utils/NotificationStore";
-import { UserInfo } from "node_modules/@metaid/metaid/dist/types";
+import type { UserInfo } from "@metaid/metaid/dist/types";
 import { buildUserState } from "@/utils/userProfile";
+
+const loadMetaidWalletSdk = () => import("@feiyangl1020/metaid");
+
 const checkExtension = () => {
   if (!window.metaidwallet) {
     window.open("https://www.metalet.space/");
@@ -160,6 +156,12 @@ export default () => {
         return;
       }
     }
+    const {
+      MetaletWalletForBtc,
+      MetaletWalletForMvc,
+      btcConnect,
+      mvcConnect,
+    } = await loadMetaidWalletSdk();
     const btcAddress = await window.metaidwallet.btc.getAddress();
     const btcPub = await window.metaidwallet.btc.getPublicKey();
     const mvcAddress = await window.metaidwallet.getAddress();
@@ -272,6 +274,12 @@ export default () => {
         setInitializing(false);
         return;
       }
+      const {
+        MetaletWalletForBtc,
+        MetaletWalletForMvc,
+        btcConnect,
+        mvcConnect,
+      } = await loadMetaidWalletSdk();
       const btcAddress = await window.metaidwallet.btc.getAddress();
       const btcPub = await window.metaidwallet.btc.getPublicKey();
       const mvcAddress = await window.metaidwallet.getAddress();
