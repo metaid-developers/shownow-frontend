@@ -4,6 +4,7 @@ import {
     fetchBuzzDetail,
     getControlByContentPin,
     getMRC20Info,
+    getPinDetailByPid,
     getUserInfo,
 } from "@/request/api";
 import {
@@ -68,7 +69,7 @@ import IDCoinBadge from "../IDCoinBadge";
 import TextContent from "./TextContent";
 import TextWithTrans from "./TextWithTrans";
 import Actions from "./Actions";
-import { resolveQuoteContent } from "@/utils/quoteContent";
+import { buildQuoteBuzzFromPin, resolveQuoteContent } from "@/utils/quoteContent";
 
 // TODO: use metaid manage state
 
@@ -198,9 +199,10 @@ export default ({
         enabled: !isEmpty(quotePinId),
         queryKey: ["buzzDetail", quotePinId],
         queryFn: () =>
-            resolveQuoteContent<API.BuzzDetailData, SimpleBuzz | PayBuzz, FormatBuzz>({
+            resolveQuoteContent<API.BuzzDetailData, SimpleBuzz | PayBuzz, FormatBuzz, API.Pin>({
                 fetchDetails: () => fetchBuzzDetail({ pinId: quotePinId }),
                 fetchContent: () => fetchBuzzContent({ pinId: quotePinId }),
+                fetchPin: () => getPinDetailByPid({ pid: quotePinId }),
                 formatContent: formatPublicQuoteContent,
                 emptyContent: () => formatSimpleBuzz({ content: "", attachments: [] }),
             }),
@@ -341,14 +343,25 @@ export default ({
                                 />
                             )}
                             {quoteContentData?.type === "content" && (
-                                <Spin spinning={quoteContentData.isLoading}>
-                                    <BuzzOriginLink host={buzzItem.host} buzzId={quotePinId}>
-                                        <Typography.Paragraph style={{ marginBottom: 0, fontSize: 12, whiteSpace: "pre-wrap" }}>
-                                            <Typography.Text>{quoteContentData.content.publicContent}</Typography.Text>
-                                        </Typography.Paragraph>
-                                        <EnhancedMediaGallery decryptContent={quoteContentData.content} />
-                                    </BuzzOriginLink>
-                                </Spin>
+                                quoteContentData.pin ? (
+                                    <ForwardTweet
+                                        buzzItem={buildQuoteBuzzFromPin(
+                                            quoteContentData.pin,
+                                            quoteContentData.content
+                                        ) as API.Buzz}
+                                        showActions={false}
+                                        loading={quoteContentData.isLoading}
+                                    />
+                                ) : (
+                                    <Spin spinning={quoteContentData.isLoading}>
+                                        <BuzzOriginLink host={buzzItem.host} buzzId={quotePinId}>
+                                            <Typography.Paragraph style={{ marginBottom: 0, fontSize: 12, whiteSpace: "pre-wrap" }}>
+                                                <Typography.Text>{quoteContentData.content.publicContent}</Typography.Text>
+                                            </Typography.Paragraph>
+                                            <EnhancedMediaGallery decryptContent={quoteContentData.content} />
+                                        </BuzzOriginLink>
+                                    </Spin>
+                                )
                             )}
                         </Card>
                     )}
