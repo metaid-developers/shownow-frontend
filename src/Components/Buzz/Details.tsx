@@ -1,5 +1,6 @@
 import { curNetwork, FLAG } from "@/config";
 import {
+    fetchBuzzContent,
     fetchBuzzDetail,
     getControlByContentPin,
     getMRC20Info,
@@ -37,7 +38,7 @@ import ForwardTweet from "./ForwardTweet";
 import type { IMvcEntity } from "@metaid/metaid";
 import { FollowIconComponent } from "../Follow";
 import dayjs from "dayjs";
-import { buildAccessPass, buildMRc20AccessPass, decodePayBuzz } from "@/utils/buzz";
+import { buildAccessPass, buildMRc20AccessPass, decodePayBuzz, FormatBuzz, formatSimpleBuzz, PayBuzz, SimpleBuzz } from "@/utils/buzz";
 import { getMvcBalance, getUtxoBalance } from "@/utils/psbtBuild";
 const { Paragraph, Text } = Typography;
 import _btc from "@/assets/btc.png";
@@ -60,12 +61,14 @@ import DonateModal from "./components/DonateModal";
 import Decimal from "decimal.js";
 import Unlock from "../Unlock";
 import BuzzOrigin from "./components/BuzzOrigin";
+import BuzzOriginLink from "./components/BuzzOriginLink";
 import MRC20Icon from "../MRC20Icon";
 import PayContent from "./components/PayContent";
 import IDCoinBadge from "../IDCoinBadge";
 import TextContent from "./TextContent";
 import TextWithTrans from "./TextWithTrans";
 import Actions from "./Actions";
+import { resolveQuoteContent } from "@/utils/quoteContent";
 
 // TODO: use metaid manage state
 
@@ -80,6 +83,18 @@ type Props = {
     isForward?: boolean;
     loading?: boolean;
     handleClick?: () => void;
+};
+
+const formatPublicQuoteContent = (rawContent: {
+    content: string;
+    attachments?: string[];
+    mentions?: Record<string, string>;
+}) => {
+    return formatSimpleBuzz({
+        content: rawContent.content,
+        attachments: rawContent.attachments ?? [],
+        mentions: rawContent.mentions ?? {},
+    });
 };
 
 export default ({
@@ -179,10 +194,16 @@ export default ({
 
     }, [buzzItem, isForward]);
 
-    const { isLoading: isQuoteLoading, data: quoteDetailData } = useQuery({
+    const { isLoading: isQuoteLoading, data: quoteContentData } = useQuery({
         enabled: !isEmpty(quotePinId),
         queryKey: ["buzzDetail", quotePinId],
-        queryFn: () => fetchBuzzDetail({ pinId: quotePinId }),
+        queryFn: () =>
+            resolveQuoteContent<API.BuzzDetailData, SimpleBuzz | PayBuzz, FormatBuzz>({
+                fetchDetails: () => fetchBuzzDetail({ pinId: quotePinId }),
+                fetchContent: () => fetchBuzzContent({ pinId: quotePinId }),
+                formatContent: formatPublicQuoteContent,
+                emptyContent: () => formatSimpleBuzz({ content: "", attachments: [] }),
+            }),
     });
     const { data: accessControl } = useQuery({
         enabled: !isEmpty(payBuzz?.id),
@@ -313,11 +334,21 @@ export default ({
                             styles={{ body: { padding: 0 } }}
                             loading={isQuoteLoading}
                         >
-                            {quoteDetailData?.data && (
+                            {quoteContentData?.type === "details" && (
                                 <ForwardTweet
-                                    buzzItem={{ ...quoteDetailData?.data.tweet, blocked: quoteDetailData?.data.blocked }}
+                                    buzzItem={{ ...quoteContentData.details.tweet, blocked: quoteContentData.details.blocked }}
                                     showActions={false}
                                 />
+                            )}
+                            {quoteContentData?.type === "content" && (
+                                <Spin spinning={quoteContentData.isLoading}>
+                                    <BuzzOriginLink host={buzzItem.host} buzzId={quotePinId}>
+                                        <Typography.Paragraph style={{ marginBottom: 0, fontSize: 12, whiteSpace: "pre-wrap" }}>
+                                            <Typography.Text>{quoteContentData.content.publicContent}</Typography.Text>
+                                        </Typography.Paragraph>
+                                        <EnhancedMediaGallery decryptContent={quoteContentData.content} />
+                                    </BuzzOriginLink>
+                                </Spin>
                             )}
                         </Card>
                     )}

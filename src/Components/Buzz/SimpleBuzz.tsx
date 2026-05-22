@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchBuzzContent, fetchBuzzDetail } from "@/request/api";
 import { Alert, Button, Card, Skeleton, Spin, theme, Typography } from "antd";
 import Trans from "../Trans";
-import { FormatBuzz, formatSimpleBuzz, SimpleBuzz } from "@/utils/buzz";
+import { FormatBuzz, formatSimpleBuzz, PayBuzz, SimpleBuzz } from "@/utils/buzz";
 import EnhancedMediaGallery from "./EnhancedMediaGallery";
 import PendingUserAvatar from "../UserInfo/PendingUserAvatar";
 import { history } from "umi";
 import BuzzOriginLink from "./components/BuzzOriginLink";
+import { resolveQuoteContent } from "@/utils/quoteContent";
 
 type Props = {
     buzzId: string;
@@ -16,55 +17,33 @@ type Props = {
     host?: string;
 }
 
-type BuzzDetail = {
-    type: 'details' | 'content',
-    details?: API.BuzzDetailData,
-    content?: FormatBuzz,
-    isLoading?: boolean,
-}
+const formatPublicQuoteContent = (rawContent: {
+    content: string;
+    attachments?: string[];
+    mentions?: Record<string, string>;
+}) => {
+    return formatSimpleBuzz({
+        content: rawContent.content,
+        attachments: rawContent.attachments ?? [],
+        mentions: rawContent.mentions ?? {},
+    });
+};
+
 export const SimpleBuzzContent = ({ buzzId, host = '' }: Props) => {
     const { token: { colorBgLayout } } = theme.useToken();
-    const { isLoading, data: buzzDetail, refetch } = useQuery({
+    const { isLoading, data: buzzDetail } = useQuery({
         enabled: !isEmpty(buzzId),
         queryKey: ['buzzContent', buzzId],
-        queryFn: async (): Promise<BuzzDetail> => {
-            const buzzDetails = await fetchBuzzDetail({ pinId: buzzId! });
-            console.log('buzzDetails', buzzDetails);
-            if (buzzDetails.data) {
-                return {
-                    type: 'details',
-                    details: buzzDetails.data,
-                }
-            }
-            const ret = await fetchBuzzContent({ pinId: buzzId! });
-            console.log('buzzDetails', ret);
-            if (typeof ret === 'string') {
-                const content = await formatSimpleBuzz({ content: '', attachments: [] } as SimpleBuzz);;
-                return {
-                    type: 'content',
-                    content,
-                    isLoading: true,
-                }
-            }
-            if (typeof ret.content === 'string') {
-                const content = await formatSimpleBuzz(ret as SimpleBuzz);
-                return {
-                    type: 'content',
-                    content,
-                    isLoading: false,
-                }
-            } else {
-                return {
-                    type: 'content',
-                    content: ret as FormatBuzz,
-                    isLoading: false,
-                }
-            }
-        },
+        queryFn: () => resolveQuoteContent<API.BuzzDetailData, SimpleBuzz | PayBuzz, FormatBuzz>({
+            fetchDetails: () => fetchBuzzDetail({ pinId: buzzId! }),
+            fetchContent: () => fetchBuzzContent({ pinId: buzzId! }),
+            formatContent: formatPublicQuoteContent,
+            emptyContent: () => formatSimpleBuzz({ content: '', attachments: [] } as SimpleBuzz),
+        }),
     })
     return <div style={{ flexGrow: 1 }}>{isLoading ? <Skeleton active /> : <div>{
 
-        buzzDetail?.type === 'details' && <RepostDetail buzzItem={buzzDetail.details?.tweet} refetchDecrypt={refetch} showHeader={false} panding={0} bordered={false} backgeround={colorBgLayout} showFooter={false} />
+        buzzDetail?.type === 'details' && <RepostDetail buzzItem={buzzDetail.details?.tweet} showHeader={false} panding={0} bordered={false} backgeround={colorBgLayout} showFooter={false} />
 
     }
         {
