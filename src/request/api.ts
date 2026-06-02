@@ -1055,8 +1055,10 @@ export const getUserNotify = async (params: {
 
 export const getReplyContent = async (params: { pinId: string }) => {
   const ret = await request<{
-    code: number;
-    data: Notification[];
+    content?: string;
+    contentType?: string;
+    attachments?: string[];
+    [key: string]: unknown;
   }>(`${getHostByNet(curNetwork)}/content/${params.pinId}`, {
     method: "GET",
   });

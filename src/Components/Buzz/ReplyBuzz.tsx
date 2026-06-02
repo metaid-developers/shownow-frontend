@@ -10,6 +10,7 @@ import { FormatBuzz, formatSimpleBuzz } from "@/utils/buzz";
 import { SimpleBuzzContent } from "./SimpleBuzz";
 import { history } from "umi";
 import BuzzOriginLink from "./components/BuzzOriginLink";
+import { normalizePinIdForContent } from "@/utils/pinId";
 
 type Props = {
     buzzId: string;
@@ -22,10 +23,11 @@ type Props = {
 }
 export default ({ buzzId, replyPinId, replyAddress, userAddress, host = '', type, fromHost = '' }: Props) => {
     const { token: { colorBgLayout } } = theme.useToken();
+    const replyContentPinId = normalizePinIdForContent(replyPinId);
 
     const { isLoading: isLoadingUser, data: replyContent } = useQuery({
-        queryKey: ['replyContent', replyPinId],
-        queryFn: () => getReplyContent({ pinId: replyPinId! }),
+        queryKey: ['replyContent', replyContentPinId],
+        queryFn: () => getReplyContent({ pinId: replyContentPinId! }),
         enabled: !isEmpty(replyPinId),
     });
 
