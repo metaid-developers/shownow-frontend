@@ -14,6 +14,7 @@ import {
     HeartFilled,
     HeartOutlined,
     LinkOutlined,
+    MailOutlined,
     MessageOutlined,
     SyncOutlined,
     UploadOutlined,
@@ -70,6 +71,7 @@ import TextContent from "./TextContent";
 import TextWithTrans from "./TextWithTrans";
 import Actions from "./Actions";
 import { buildQuoteBuzzFromPin, resolveQuoteContent } from "@/utils/quoteContent";
+import { openIdChatDm } from "@/utils/dm";
 
 // TODO: use metaid manage state
 
@@ -109,7 +111,7 @@ export default ({
     handleClick,
 }: Props) => {
     const {
-        token: { colorBorderSecondary, colorBorder, colorBgBlur, colorBgContainer },
+        token: { colorBorderSecondary, colorBorder, colorBgBlur, colorBgContainer, colorPrimary },
     } = theme.useToken();
    
     const {
@@ -284,10 +286,26 @@ export default ({
                                 history.push(`/profile/${buzzItem.creator}`);
                             }}
                         >
-                            <Text style={{ fontSize: 14, lineHeight: 1 }}>
-                                {" "}
-                                {currentUserInfoData.data?.name || "Unnamed"}
-                            </Text>
+                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                <Text style={{ fontSize: 14, lineHeight: 1 }}>
+                                    {" "}
+                                    {currentUserInfoData.data?.name || "Unnamed"}
+                                </Text>
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    className="dmIconButton"
+                                    icon={<MailOutlined />}
+                                    title="Send DM"
+                                    aria-label="Send DM"
+                                    disabled={!currentUserInfoData.data?.globalMetaId}
+                                    style={{ color: colorPrimary }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openIdChatDm(currentUserInfoData.data?.globalMetaId);
+                                    }}
+                                />
+                            </div>
                             <div style={{ display: "flex", gap: 8, alignItems: 'center' }}>
                                 <Text type="secondary" style={{ fontSize: 10, lineHeight: 1 }}>
                                     {currentUserInfoData.data?.metaid.slice(0, 8)}

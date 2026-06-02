@@ -11,12 +11,13 @@ import Trans from "../Trans";
 import { useMemo, useRef, useState } from "react";
 import TextContent from "./TextContent";
 import TextWithTrans from "./TextWithTrans";
-import { LinkOutlined, SyncOutlined } from "@ant-design/icons";
+import { LinkOutlined, MailOutlined, SyncOutlined } from "@ant-design/icons";
 import { curNetwork } from "@/config";
 import dayjs from "dayjs";
 import Actions from "./Actions";
 import ChatGroup from "./ChatGroup";
 import EnhancedMediaGallery from "./EnhancedMediaGallery";
+import { openIdChatDm } from "@/utils/dm";
 const { Text } = Typography;
 
 type Props = {
@@ -50,7 +51,7 @@ type ShareChatMessageData = {
 }
 export default ({ buzzItem, showActions = true, padding = 20, reLoading = false, refetch, like = [], handleClick, donate = [], isForward = false }: Props) => {
     const {
-        token: { colorBorder, colorBorderSecondary }
+        token: { colorBorder, colorBorderSecondary, colorPrimary }
     } = theme.useToken();
     const contentRef = useRef<HTMLDivElement>(null); // 引用内容容器
     const [isExpanded, setIsExpanded] = useState(false);
@@ -123,9 +124,25 @@ export default ({ buzzItem, showActions = true, padding = 20, reLoading = false,
                             history.push(`/profile/${buzzItem.creator}`);
                         }}
                     >
-                        <Text style={{ fontSize: 14, lineHeight: 1 }}>
-                            {currentUserInfoData.data?.name || "Unnamed"}
-                        </Text>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <Text style={{ fontSize: 14, lineHeight: 1 }}>
+                                {currentUserInfoData.data?.name || "Unnamed"}
+                            </Text>
+                            <Button
+                                type="text"
+                                size="small"
+                                className="dmIconButton"
+                                icon={<MailOutlined />}
+                                title="Send DM"
+                                aria-label="Send DM"
+                                disabled={!currentUserInfoData.data?.globalMetaId}
+                                style={{ color: colorPrimary }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openIdChatDm(currentUserInfoData.data?.globalMetaId);
+                                }}
+                            />
+                        </div>
                         <div style={{ display: "flex", gap: 8, alignItems: 'center' }}>
                             <Text type="secondary" style={{ fontSize: 10, lineHeight: 1 }}>
                                 {currentUserInfoData.data?.metaid.slice(0, 8)}
@@ -211,10 +228,26 @@ export default ({ buzzItem, showActions = true, padding = 20, reLoading = false,
                                         history.push(`/profile/${originUserInfo.data?.address}`);
                                     }}
                                 >
-                                    <Text style={{ fontSize: 14, lineHeight: 1 }}>
-                                        {" "}
-                                        {originUserInfo.data?.name || "Unnamed"}
-                                    </Text>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                                        <Text style={{ fontSize: 14, lineHeight: 1 }}>
+                                            {" "}
+                                            {originUserInfo.data?.name || "Unnamed"}
+                                        </Text>
+                                        <Button
+                                            type="text"
+                                            size="small"
+                                            className="dmIconButton"
+                                            icon={<MailOutlined />}
+                                            title="Send DM"
+                                            aria-label="Send DM"
+                                            disabled={!originUserInfo.data?.globalMetaId}
+                                            style={{ color: colorPrimary }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openIdChatDm(originUserInfo.data?.globalMetaId);
+                                            }}
+                                        />
+                                    </div>
                                     <div style={{ display: "flex", gap: 8, alignItems: 'center' }}>
                                         <Text type="secondary" style={{ fontSize: 10, lineHeight: 1 }}>
                                             {originUserInfo.data?.metaid.slice(0, 8)}

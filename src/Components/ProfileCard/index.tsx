@@ -6,11 +6,12 @@ import { F, isEmpty } from "ramda";
 import { useModel, history } from "umi";
 import { FollowButtonComponent } from "../Follow";
 import UserAvatar from "../UserAvatar";
-import { EditOutlined } from "@ant-design/icons";
+import { EditOutlined, MailOutlined } from "@ant-design/icons";
 import Trans from "../Trans";
 import './index.less'
 import { openWindowTarget } from "@/utils/utils";
 import NumberFormat from "../NumberFormat";
+import { openIdChatDm } from "@/utils/dm";
 
 type Props = {
     address: string;
@@ -99,13 +100,26 @@ export default ({ address, IDCoin }: Props) => {
 
 
 
-                    <FollowButtonComponent metaid={profileUserData?.data?.metaid || ''} />
-                    {
-                        address === user.address && <Button icon={<EditOutlined />} variant='filled' color='default' shape='circle' onClick={() => {
-                            history.push('/setting')
+                    <Space direction="vertical" align="end" size={10} className="profileActionButtons">
+                        <FollowButtonComponent metaid={profileUserData?.data?.metaid || ''} />
+                        <Button
+                            icon={<MailOutlined />}
+                            shape="round"
+                            size="small"
+                            disabled={!globalMetaId}
+                            onClick={() => {
+                                openIdChatDm(globalMetaId);
+                            }}
+                        >
+                            Send DM
+                        </Button>
+                        {
+                            address === user.address && <Button icon={<EditOutlined />} variant='filled' color='default' shape='circle' onClick={() => {
+                                history.push('/setting')
+                            }
+                            } />
                         }
-                        } />
-                    }
+                    </Space>
 
 
                 </div>
