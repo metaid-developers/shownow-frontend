@@ -1,4 +1,5 @@
 import Trans from "@/Components/Trans";
+import { getBuzzOriginLinkMode } from "@/utils/buzzOriginLink";
 import { message, Tooltip, Typography } from "antd";
 import { history, useModel } from "umi";
 
@@ -10,8 +11,8 @@ type BuzzOriginProps = {
 }
 
 export default ({ host, children, style, buzzId }: BuzzOriginProps) => {
-    if (!host) {
-        return null
+    if (getBuzzOriginLinkMode(host) === "plain") {
+        return <>{children}</>
     }
     const { domainMap } = useModel('dashboard');
     const domain = domainMap[host.toLowerCase()];
