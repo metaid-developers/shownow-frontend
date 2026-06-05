@@ -11,6 +11,8 @@ type AvatarRecordLike = {
 
 const INDEXED_AVATAR_BASE_URL =
   "https://metafs.oss-cn-beijing.aliyuncs.com/indexer/avatar";
+const AVATAR_THUMBNAIL_BASE_URL =
+  "https://file.metaid.io/metafile-indexer/api/v1/users/avatar/accelerate";
 const AVATAR_PIN_ID_PATTERN = /([a-f0-9]{64}i\d+)/i;
 const DATA_OR_BLOB_URL_PATTERN = /^(data:|blob:)/i;
 const ABSOLUTE_HTTP_URL_PATTERN = /^https?:\/\//i;
@@ -68,6 +70,19 @@ export function buildIndexedAvatarUrl(
   )}/${txId}/${normalizedPinId}.txt`;
 }
 
+export function buildAvatarThumbnailUrl(
+  pinId: string | null | undefined
+): string {
+  const normalizedPinId = getAvatarPinId(pinId);
+  if (!normalizedPinId) {
+    return "";
+  }
+
+  return `${AVATAR_THUMBNAIL_BASE_URL}/${encodeURIComponent(
+    normalizedPinId
+  )}?process=thumbnail`;
+}
+
 export function normalizeAvatarUrl(
   value: string | AvatarRecordLike | null | undefined,
   baseUrl = ""
@@ -95,13 +110,13 @@ export function normalizeAvatarUrl(
 
   if (avatar && ABSOLUTE_HTTP_URL_PATTERN.test(avatar)) {
     if (hasContentPath(avatar) && avatarPinId) {
-      return buildIndexedAvatarUrl(avatarPinId, record.chainName);
+      return buildAvatarThumbnailUrl(avatarPinId);
     }
     return avatar;
   }
 
   if (avatarPinId) {
-    return buildIndexedAvatarUrl(avatarPinId, record.chainName);
+    return buildAvatarThumbnailUrl(avatarPinId);
   }
 
   if (!avatar || /^\/content\/?$/i.test(avatar)) {

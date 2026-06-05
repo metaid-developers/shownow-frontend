@@ -1,23 +1,23 @@
 import assert from "node:assert/strict";
 import {
-  buildIndexedAvatarUrl,
+  buildAvatarThumbnailUrl,
   getAvatarPinId,
   normalizeAvatarUrl,
 } from "./avatar";
 
 const avatarPinId =
   "92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0";
-const indexedAvatarUrl =
-  "https://metafs.oss-cn-beijing.aliyuncs.com/indexer/avatar/mvc/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0.txt";
+const thumbnailAvatarUrl =
+  "https://file.metaid.io/metafile-indexer/api/v1/users/avatar/accelerate/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0?process=thumbnail";
 
 assert.equal(getAvatarPinId(`/content/${avatarPinId}`), avatarPinId);
-assert.equal(buildIndexedAvatarUrl(avatarPinId, "mvc"), indexedAvatarUrl);
+assert.equal(buildAvatarThumbnailUrl(avatarPinId), thumbnailAvatarUrl);
 assert.equal(
   normalizeAvatarUrl({
     avatar: `/content/${avatarPinId}`,
     avatarId: avatarPinId,
   }),
-  indexedAvatarUrl
+  thumbnailAvatarUrl
 );
 assert.equal(
   normalizeAvatarUrl(

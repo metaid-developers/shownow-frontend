@@ -9,8 +9,8 @@ import {
 const baseUrl = "https://man.metaid.io";
 const ericAvatarPinId =
   "92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0";
-const ericIndexedAvatarUrl =
-  "https://metafs.oss-cn-beijing.aliyuncs.com/indexer/avatar/mvc/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0.txt";
+const ericThumbnailAvatarUrl =
+  "https://file.metaid.io/metafile-indexer/api/v1/users/avatar/accelerate/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0?process=thumbnail";
 
 assert.equal(normalizeProfileMediaUrl("", baseUrl), "");
 assert.equal(
@@ -108,7 +108,7 @@ assert.deepEqual(
   {
     globalMetaId: "idq1j3yu9vmwxkqdqrrt39qxl8u69vs0esjhwg6l5k",
     metaid: "3f8121c0c277f80c8edf7e36b9f64e2ac13b58bf39da7a6f32ec006365c14297",
-    avatar: ericIndexedAvatarUrl,
+    avatar: ericThumbnailAvatarUrl,
     avatarId: ericAvatarPinId,
     bio: "",
   }
