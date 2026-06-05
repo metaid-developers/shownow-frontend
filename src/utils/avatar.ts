@@ -9,8 +9,6 @@ type AvatarRecordLike = {
   chainName?: string | null;
 };
 
-const INDEXED_AVATAR_BASE_URL =
-  "https://metafs.oss-cn-beijing.aliyuncs.com/indexer/avatar";
 const AVATAR_THUMBNAIL_BASE_URL =
   "https://file.metaid.io/metafile-indexer/api/v1/users/avatar/accelerate";
 const AVATAR_PIN_ID_PATTERN = /([a-f0-9]{64}i\d+)/i;
@@ -19,11 +17,6 @@ const ABSOLUTE_HTTP_URL_PATTERN = /^https?:\/\//i;
 
 function normalizeText(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
-}
-
-function normalizeChainName(value: unknown): string {
-  const chainName = normalizeText(value).toLowerCase();
-  return chainName === "btc" || chainName === "mvc" ? chainName : "mvc";
 }
 
 function joinBaseUrl(baseUrl: string, path: string): string {
@@ -53,21 +46,6 @@ export function getAvatarPinId(value: string | null | undefined): string {
 
   const match = normalized.match(AVATAR_PIN_ID_PATTERN);
   return match ? match[1] : "";
-}
-
-export function buildIndexedAvatarUrl(
-  pinId: string | null | undefined,
-  chainName?: string | null
-): string {
-  const normalizedPinId = getAvatarPinId(pinId);
-  if (!normalizedPinId) {
-    return "";
-  }
-
-  const txId = normalizedPinId.replace(/i\d+$/i, "");
-  return `${INDEXED_AVATAR_BASE_URL}/${normalizeChainName(
-    chainName
-  )}/${txId}/${normalizedPinId}.txt`;
 }
 
 export function buildAvatarThumbnailUrl(
