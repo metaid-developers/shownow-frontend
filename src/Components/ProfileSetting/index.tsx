@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getUserInfo } from "@/request/api"
 import { ASSIST_ENDPOINT, BASE_MAN_URL, curNetwork } from "@/config"
 import { image2Attach } from "@/utils/file"
+import { normalizeAvatarUrl } from "@/utils/avatar"
 import UploadAvatar from "../ProfileCard/UploadAvatar"
 import { formatMessage, getEffectiveBTCFeerate } from "@/utils/utils"
 
@@ -40,7 +41,7 @@ export default () => {
     useEffect(() => {
         form.setFieldsValue({
             name: profileUserData.data?.name,
-            avatar: profileUserData.data?.avatar ? `${BASE_MAN_URL}${profileUserData.data?.avatar}` : '',
+            avatar: normalizeAvatarUrl(profileUserData.data, BASE_MAN_URL),
         })
     }, [profileUserData.data])
 

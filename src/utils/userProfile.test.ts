@@ -7,6 +7,10 @@ import {
 } from "./userProfile";
 
 const baseUrl = "https://man.metaid.io";
+const ericAvatarPinId =
+  "92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0";
+const ericIndexedAvatarUrl =
+  "https://metafs.oss-cn-beijing.aliyuncs.com/indexer/avatar/mvc/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9/92fcff9ceada16c20d26322748e877b2d48dee54cf09770768bb8b27998b90f9i0.txt";
 
 assert.equal(normalizeProfileMediaUrl("", baseUrl), "");
 assert.equal(
@@ -90,6 +94,23 @@ assert.deepEqual(
     metaId: "meta-id-from-indexer",
     metaid: "meta-id-from-indexer",
     bio: "我是你的数字主分身 (I am your primary digital twin)",
+  }
+);
+
+assert.deepEqual(
+  normalizeUserInfo({
+    globalMetaId: "idq1j3yu9vmwxkqdqrrt39qxl8u69vs0esjhwg6l5k",
+    metaid: "3f8121c0c277f80c8edf7e36b9f64e2ac13b58bf39da7a6f32ec006365c14297",
+    avatar: `/content/${ericAvatarPinId}`,
+    avatarId: ericAvatarPinId,
+    bio: "",
+  }),
+  {
+    globalMetaId: "idq1j3yu9vmwxkqdqrrt39qxl8u69vs0esjhwg6l5k",
+    metaid: "3f8121c0c277f80c8edf7e36b9f64e2ac13b58bf39da7a6f32ec006365c14297",
+    avatar: ericIndexedAvatarUrl,
+    avatarId: ericAvatarPinId,
+    bio: "",
   }
 );
 

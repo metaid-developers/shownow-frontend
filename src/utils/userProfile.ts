@@ -1,5 +1,14 @@
+import { normalizeAvatarUrl } from "./avatar";
+
 type UserInfoLike = {
   avatar?: string | null;
+  avatarUrl?: string | null;
+  avatarImage?: string | null;
+  avatarUri?: string | null;
+  avatar_uri?: string | null;
+  avatarId?: string | null;
+  avatarPinId?: string | null;
+  chainName?: string | null;
   background?: string | null;
   name?: string | null;
   globalMetaId?: string | null;
@@ -79,12 +88,29 @@ export function normalizeUserInfo<T extends UserInfoLike>(
     return undefined;
   }
 
-  return {
+  const normalized = {
     ...userInfo,
     globalMetaId: userInfo.globalMetaId || "",
     metaid: userInfo.metaid || userInfo.metaId || "",
     bio: normalizeProfileText(userInfo.bio),
   };
+
+  if (
+    userInfo.avatar !== undefined ||
+    userInfo.avatarUrl !== undefined ||
+    userInfo.avatarImage !== undefined ||
+    userInfo.avatarUri !== undefined ||
+    userInfo.avatar_uri !== undefined ||
+    userInfo.avatarId !== undefined ||
+    userInfo.avatarPinId !== undefined
+  ) {
+    return {
+      ...normalized,
+      avatar: normalizeAvatarUrl(userInfo),
+    };
+  }
+
+  return normalized;
 }
 
 export function buildUserState({
@@ -101,7 +127,7 @@ export function buildUserState({
   const normalizedUserInfo = normalizeUserInfo(userInfo);
 
   return {
-    avatar: normalizeProfileMediaUrl(normalizedUserInfo?.avatar, baseUrl),
+    avatar: normalizeAvatarUrl(normalizedUserInfo, baseUrl),
     background: normalizeProfileMediaUrl(
       normalizedUserInfo?.background,
       baseUrl
