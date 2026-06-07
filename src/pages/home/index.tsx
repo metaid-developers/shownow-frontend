@@ -11,6 +11,7 @@ import Trans from "@/Components/Trans";
 import KeepAliveWrap from "@/Components/KeepAliveWrap";
 import Tweet, { TweetCard } from "../tweet";
 import InfiniteScrollV2 from "@/Components/InfiniteScrollV2";
+import { createHomeNewBuzzQueryOptions } from "./feedQuery";
 
 const { useBreakpoint } = Grid
 
@@ -28,19 +29,7 @@ const Home = () => {
     }, [state])
     const { data, isLoading, fetchNextPage, isFetchingNextPage, hasNextPage, refetch, isFetching } =
         useInfiniteQuery({
-            queryKey: ['homebuzzesnew'],
-            queryFn: ({ pageParam }) =>
-                fetchAllBuzzs({
-                    size: 10,
-                    lastId: pageParam,
-                }),
-            initialPageParam: '',
-            getNextPageParam: (lastPage, allPages) => {
-                // const { data: { lastId } } = lastPage
-                const lastId = lastPage?.data?.lastId
-                if (!lastId) return
-                return lastId;
-            },
+            ...createHomeNewBuzzQueryOptions(fetchAllBuzzs),
         });
 
     const tweets = useMemo(() => {
