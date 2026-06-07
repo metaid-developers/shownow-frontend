@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  getMetafileImageFallbackUrl,
   getMetafileImagePreviewUrl,
   getMetafileOriginalUrl,
   getMetafilePinIdFromSource,
@@ -8,6 +9,7 @@ import {
 const base = "https://file.metaid.io/metafile-indexer/api/v1/files";
 const original = `${base}/accelerate/content/abc123i0`;
 const preview = `${original}?process=preview`;
+const fallback = "https://man.metaid.io/content/abc123i0";
 
 assert.equal(getMetafilePinIdFromSource("metafile://abc123i0.jpg"), "abc123i0");
 assert.equal(getMetafilePinIdFromSource("metafile://video/abc123i0"), "abc123i0");
@@ -24,6 +26,15 @@ assert.equal(
 assert.equal(getMetafileImagePreviewUrl("metafile://abc123i0.jpg"), preview);
 assert.equal(getMetafileImagePreviewUrl("abc123i0"), preview);
 assert.equal(getMetafileImagePreviewUrl(`${base}/content/abc123i0`), preview);
+
+assert.equal(getMetafileImageFallbackUrl("metafile://abc123i0.jpg"), fallback);
+assert.equal(getMetafileImageFallbackUrl(preview), fallback);
+assert.equal(getMetafileImageFallbackUrl(original), fallback);
+assert.equal(
+  getMetafileImageFallbackUrl("https://example.com/not-a-metafile/image.png"),
+  undefined
+);
+assert.equal(getMetafileImageFallbackUrl("data:image/png;base64,abc"), undefined);
 
 assert.equal(getMetafileOriginalUrl("metafile://abc123i0.jpg"), original);
 assert.equal(getMetafileOriginalUrl("metafile://video/abc123i0"), original);

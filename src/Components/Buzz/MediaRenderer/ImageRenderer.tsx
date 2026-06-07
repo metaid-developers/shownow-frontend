@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image } from 'antd';
 import { FallbackImage } from '@/config';
-import { getDownloadUrl } from './utils';
+import { getDownloadUrl, getImageFallbackUrl } from './utils';
 
 interface ImageRendererProps {
   url: string;
@@ -20,7 +20,8 @@ const ImageRenderer: React.FC<ImageRendererProps> = ({
   style,
   onClick,
 }) => {
-    console.log('Rendering image with URL:', url);
+  const fallbackUrl = getImageFallbackUrl(originalUrl || url);
+  console.log('Rendering image with URL:', url);
   return (
     <Image
       src={url}
@@ -33,7 +34,7 @@ const ImageRenderer: React.FC<ImageRendererProps> = ({
         maxHeight: '400px',
         ...style,
       }}
-      fallback={FallbackImage}
+      fallback={fallbackUrl ?? FallbackImage}
       onClick={onClick}
       preview={{
         mask: false,

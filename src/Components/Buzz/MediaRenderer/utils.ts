@@ -3,6 +3,7 @@ import {
   stripMetafilePrefix,
 } from "@/utils/metafile";
 import {
+  getMetafileImageFallbackUrl,
   getMetafileImagePreviewUrl,
   getMetafileOriginalUrl,
   getMetafilePinIdFromSource,
@@ -396,6 +397,10 @@ export function getMimeType(extension: string): string {
  */
 export function getPreviewUrl(url: string): string {
   return getMetafileImagePreviewUrl(url);
+}
+
+export function getImageFallbackUrl(url: string): string | undefined {
+  return getMetafileImageFallbackUrl(url);
 }
 
 /**

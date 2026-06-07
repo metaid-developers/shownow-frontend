@@ -4,7 +4,7 @@ import { Image, theme } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import './imageGallery.less'
 import { useLocation } from "umi";
-import { getDownloadUrl, getPreviewUrl } from "./MediaRenderer/utils";
+import { getDownloadUrl, getImageFallbackUrl, getPreviewUrl } from "./MediaRenderer/utils";
 
 type Props = {
     decryptContent: {
@@ -76,11 +76,12 @@ export default ({ decryptContent }: Props) => {
             >
                 {
                     decryptContent?.publicFiles.map((pid: string, index) => {
+                        const fallbackUrl = getImageFallbackUrl(pid);
                         return <Image
                             key={pid}
                             style={{ objectFit: 'cover', height: '100%', maxHeight: 400, display: index > 8 ? 'none' : 'block', borderRadius: borderRadiusLG, }}
                             src={getPreviewUrl(pid)}
-                            fallback={FallbackImage}
+                            fallback={fallbackUrl ?? FallbackImage}
                             className="image-item"
                             preview={{
                                 src: getDownloadUrl(pid),

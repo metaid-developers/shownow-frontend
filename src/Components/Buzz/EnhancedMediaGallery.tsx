@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Image, theme } from 'antd';
 import { useLocation } from 'umi';
 import MediaRenderer from './MediaRenderer';
-import { getFileType, FileType, getDownloadUrl, getPreviewUrl } from './MediaRenderer/utils';
+import { getFileType, FileType, getDownloadUrl, getImageFallbackUrl, getPreviewUrl } from './MediaRenderer/utils';
 import { FallbackImage } from '@/config';
 import './imageGallery.less';
 
@@ -104,6 +104,7 @@ export default ({ decryptContent }: Props) => {
 
     const imageUrl = getPreviewUrl(file);
     const originalUrl = getDownloadUrl(file);
+    const fallbackUrl = getImageFallbackUrl(file);
     return (
       <Image
         key={`public-${index}`}
@@ -115,7 +116,7 @@ export default ({ decryptContent }: Props) => {
           display: index > 8 ? 'none' : 'block',
         }}
         src={imageUrl}
-        fallback={FallbackImage}
+        fallback={fallbackUrl ?? FallbackImage}
         className="image-item"
         preview={{
           src: originalUrl,

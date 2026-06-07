@@ -2,6 +2,7 @@ import { getMetafilePinId, stripMetafilePrefix } from "./metafile";
 
 export const METAFILE_FILES_API =
   "https://file.metaid.io/metafile-indexer/api/v1/files";
+const METAFILE_MAN_CONTENT_API = "https://man.metaid.io/content";
 
 const ACCELERATE_CONTENT_PATH = "accelerate/content";
 const DATA_OR_BLOB_URL_PATTERN = /^(data:|blob:)/i;
@@ -86,6 +87,10 @@ export function buildMetafileImagePreviewUrl(pinId: string): string {
   return `${buildMetafileOriginalUrl(pinId)}?process=preview`;
 }
 
+export function buildMetafileImageFallbackUrl(pinId: string): string {
+  return `${METAFILE_MAN_CONTENT_API}/${pinId}`;
+}
+
 export function getMetafileOriginalUrl(source: string): string {
   const pinId = getMetafilePinIdFromSource(source);
   return pinId ? buildMetafileOriginalUrl(pinId) : source;
@@ -94,4 +99,11 @@ export function getMetafileOriginalUrl(source: string): string {
 export function getMetafileImagePreviewUrl(source: string): string {
   const pinId = getMetafilePinIdFromSource(source);
   return pinId ? buildMetafileImagePreviewUrl(pinId) : source;
+}
+
+export function getMetafileImageFallbackUrl(
+  source: string
+): string | undefined {
+  const pinId = getMetafilePinIdFromSource(source);
+  return pinId ? buildMetafileImageFallbackUrl(pinId) : undefined;
 }
