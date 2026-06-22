@@ -1,3 +1,5 @@
+import { METAID_TEXT_CONTENT_TYPE } from "./metaidPinContent";
+
 export type QuoteContentResult<TDetails, TContent, TPin = unknown> =
   | {
       type: "details";
@@ -40,7 +42,7 @@ export function buildQuoteBuzzFromPin<TPin extends QuotePin>(
     mentions?: Record<string, string>;
   } = {
     content: content.publicContent,
-    contentType: "application/json;utf-8",
+    contentType: METAID_TEXT_CONTENT_TYPE,
   };
 
   if (content.publicFiles?.length) {

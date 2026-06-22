@@ -31,6 +31,7 @@ import {
 import * as crypto from "crypto";
 import { isArray } from "lib/tool";
 import { normalizeVideoMetafileUri } from "@/utils/metafile";
+import { METAID_JSON_CONTENT_TYPE, METAID_TEXT_CONTENT_TYPE } from "@/utils/metaidPinContent";
 bitcoin.initEccLib(ecc);
 const ECPair = ECPairFactory(ecc);
 type PostParams = {
@@ -110,7 +111,7 @@ export const postPayBuzz = async (
   const payload: any = {
     publicContent,
     encryptContent: _encryptContent,
-    contentType: "application/json;utf-8",
+    contentType: METAID_TEXT_CONTENT_TYPE,
     publicFiles: [...nfts, ...attachments],
     encryptFiles: encryptAttachments,
     // mentions,
@@ -123,7 +124,7 @@ export const postPayBuzz = async (
     operation: "create",
     body: JSON.stringify(payload),
     path,
-    contentType: "application/json;utf-8",
+    contentType: METAID_JSON_CONTENT_TYPE,
     flag: "metaid",
   };
 

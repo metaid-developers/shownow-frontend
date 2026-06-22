@@ -10,6 +10,7 @@ import { isNil } from "ramda";
 import { useQueryClient } from "@tanstack/react-query";
 import commentEntitySchema, { getCommentEntitySchemaWithCustomHost } from "@/entities/comment";
 import { formatMessage, getEffectiveBTCFeerate, sleep } from "@/utils/utils";
+import { buildJsonPinData, buildTextContentPayload } from "@/utils/metaidPinContent";
 import Trans from "../Trans";
 const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
@@ -38,23 +39,19 @@ export default ({ show, onClose, tweetId }: Props) => {
         setIsAdding(true);
 
         try {
-            const finalBody: any = {
-                content: content,
-                contentType: 'application/json;utf-8',
+            const finalBody: any = buildTextContentPayload(content, {
                 commentTo: tweetId,
-            };
+            });
             console.log('finalBody', finalBody);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if (chain === 'btc') {
                 const createRes = await btcConnector!.inscribe({
                     inscribeDataArray: [
-                        {
+                        buildJsonPinData(finalBody, {
                             operation: 'create',
                             path: `${showConf?.host ?? ''}/protocols/paycomment`,
-                            body: JSON.stringify(finalBody),
-                            contentType: 'application/json;utf-8',
                             flag: FLAG,
-                        },
+                        }),
                     ],
                     options: {
                         noBroadcast: 'no',
@@ -87,7 +84,7 @@ export default ({ show, onClose, tweetId }: Props) => {
 
                 const Comment = await mvcConnector!.load(getCommentEntitySchemaWithCustomHost(showConf?.host ?? ''))
                 const createRes = await Comment.create({
-                    data: { body: JSON.stringify(finalBody) },
+                    data: buildJsonPinData(finalBody),
                     options: {
                         network: curNetwork,
                         signMessage: 'create comment',

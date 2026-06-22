@@ -9,6 +9,7 @@ import { ASSIST_ENDPOINT, curNetwork } from "@/config";
 import { useState } from "react";
 import { isNil } from "lodash";
 import { getMVCRewards } from "@/request/metaso";
+import { METAID_TEXT_CONTENT_TYPE, buildJsonPinData, buildTextContentPayload } from "@/utils/metaidPinContent";
 
 export default () => {
     const { setShowFirstPost, showFirstPost, chain, btcConnector, mvcConnector, feeRate, mvcFeeRate, setMockBuzz, isLogin, user } = useModel('user');
@@ -27,15 +28,12 @@ export default () => {
         try{
 
        
-        const finalBody: any = {
-            content: content,
-            contentType: 'application/json;utf-8',
-        };
+        const finalBody: any = buildTextContentPayload(content);
         const buzzEntity = await mvcConnector!.load(getBuzzSchemaWithCustomHost(showConf?.host ?? '')) as IMvcEntity;
         let createRes: any;
 
         createRes = await buzzEntity!.create({
-            data: { body: JSON.stringify({ ...finalBody }) },
+            data: buildJsonPinData(finalBody),
             options: {
                 assistDomian: ASSIST_ENDPOINT,
                 network: curNetwork,
@@ -71,7 +69,7 @@ export default () => {
                 address: user.address,
                 contentBody: null,
                 contentLength: 0,
-                contentType: 'text/plain;utf-8',
+                contentType: METAID_TEXT_CONTENT_TYPE,
                 createMetaId: user.metaid,
                 dataValue: 0,
                 donateCount: 0,
@@ -100,7 +98,7 @@ export default () => {
                 location: '',
                 originalPath: '',
                 version: '1.0.0',
-                contentTypeDetect: 'text/plain;utf-8',
+                contentTypeDetect: METAID_TEXT_CONTENT_TYPE,
                 contentSummary: JSON.stringify(finalBody),
                 originalId: '',
                 mrc20MintId: [],

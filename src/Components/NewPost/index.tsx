@@ -17,6 +17,7 @@ import _mvc from '@/assets/mvc.png'
 import type { InscribeData } from "@metaid/metaid/dist/core/entity/btc";
 import { checkImageSize, encryptPayloadAES, formatMessage, generateAESKey, getEffectiveBTCFeerate, openWindowTarget, sleep } from "@/utils/utils";
 import { postPayBuzz, postVideo } from "@/utils/buzz";
+import { METAID_TEXT_CONTENT_TYPE, buildJsonPinData, buildTextContentPayload } from "@/utils/metaidPinContent";
 import { getDeployList, getMRC20Info, getUserInfo } from "@/request/api";
 import UserAvatar from "../UserAvatar";
 import Trans from "../Trans";
@@ -281,11 +282,7 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
 
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const finalBody: any = {
-                content: buzz.content,
-                contentType: 'application/json;utf-8',
-                // mentions: mentions || {}
-            };
+            const finalBody: any = buildTextContentPayload(buzz.content);
 
             if (video && chainNet === 'mvc') {
                 const { metafile, transactions } = await postVideo(video.file, showConf?.host || '', chainNet, btcConnector, mvcConnector, mvcFeeRate);
@@ -512,21 +509,13 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
                 finalBody.attachments = [...nfts.map(nft => `metafile://nft/mrc721/${nft.itemPinId}`), ...finalBody.attachments || []]
             }
             if (chainNet === 'btc') {
-                console.log('finalBody', {
-                    body: JSON.stringify(finalBody),
-                    contentType: 'application/json;utf-8',
+                const simpleBuzzPinData = buildJsonPinData(finalBody, {
                     flag: FLAG,
                     path: `${showConf?.host || ''}/protocols/simplebuzz`
                 });
+                console.log('finalBody', simpleBuzzPinData);
                 const createRes = await buzzEntity!.create({
-                    dataArray: [
-                        {
-                            body: JSON.stringify(finalBody),
-                            contentType: 'application/json;utf-8',
-                            flag: FLAG,
-                            path: `${showConf?.host || ''}/protocols/simplebuzz`
-                        },
-                    ],
+                    dataArray: [simpleBuzzPinData],
                     options: {
                         noBroadcast: 'no',
                         feeRate: getEffectiveBTCFeerate(Number(feeRate)),
@@ -560,7 +549,7 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
                         address: user.address,
                         contentBody: null,
                         contentLength: 0,
-                        contentType: 'text/plain;utf-8',
+                        contentType: METAID_TEXT_CONTENT_TYPE,
                         createMetaId: user.metaid,
                         dataValue: 0,
                         donateCount: 0,
@@ -605,7 +594,7 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
                 let createRes: any;
                 if (false && admin?.assist && isEmpty(buzz.images) && !video) {
                     createRes = await buzzEntity!.create({
-                        data: { body: JSON.stringify({ ...finalBody }) },
+                        data: buildJsonPinData(finalBody),
                         options: {
                             assistDomian: ASSIST_ENDPOINT,
                             network: curNetwork,
@@ -619,7 +608,7 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
                     })
                 } else {
                     createRes = await buzzEntity!.create({
-                        data: { body: JSON.stringify({ ...finalBody }) },
+                        data: buildJsonPinData(finalBody),
                         options: {
                             network: curNetwork,
                             signMessage: 'create buzz',
@@ -656,7 +645,7 @@ export default ({ show, onClose, quotePin, quoteComment }: Props) => {
                         address: user.address,
                         contentBody: null,
                         contentLength: 0,
-                        contentType: 'text/plain;utf-8',
+                        contentType: METAID_TEXT_CONTENT_TYPE,
                         createMetaId: user.metaid,
                         dataValue: 0,
                         donateCount: 0,

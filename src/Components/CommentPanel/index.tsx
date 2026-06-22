@@ -9,6 +9,7 @@ import PendingUser from "../UserInfo/PendingUser";
 import { GiftOutlined, HeartFilled, HeartOutlined, LinkOutlined, MessageOutlined, UploadOutlined } from "@ant-design/icons";
 import { curNetwork, FLAG } from "@/config";
 import dayjs from "dayjs";
+import { buildJsonPinData } from "@/utils/metaidPinContent";
 import { formatMessage, getEffectiveBTCFeerate } from "@/utils/utils";
 import { lazy, Suspense, useMemo, useState } from "react";
 import type { IMvcEntity } from "@feiyangl1020/metaid";
@@ -59,12 +60,10 @@ export const CommentItem = ({ item, level }: { item: API.CommentRes, level: numb
                 const likeEntity = await btcConnector!.use("like");
                 const likeRes = await likeEntity.create({
                     dataArray: [
-                        {
-                            body: JSON.stringify({ isLike: "1", likeTo: pinId }),
+                        buildJsonPinData({ isLike: "1", likeTo: pinId }, {
                             flag: FLAG,
-                            contentType: "application/json;utf-8",
                             path: `${showConf?.host || ""}/protocols/paylike`,
-                        },
+                        }),
                     ],
                     options: {
                         noBroadcast: "no",
@@ -80,13 +79,12 @@ export const CommentItem = ({ item, level }: { item: API.CommentRes, level: numb
             } else {
                 const likeEntity = (await mvcConnector!.use("like")) as IMvcEntity;
                 const likeRes = await likeEntity.create({
-                    data: {
-                        body: JSON.stringify({
-                            isLike: "1",
-                            likeTo: pinId,
-                        }),
+                    data: buildJsonPinData({
+                        isLike: "1",
+                        likeTo: pinId,
+                    }, {
                         path: `${showConf?.host || ""}/protocols/paylike`,
-                    },
+                    }),
                     options: {
                         network: curNetwork,
                         signMessage: "like buzz",
