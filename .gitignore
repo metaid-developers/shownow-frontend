@@ -8,3 +8,4 @@
 /dist
 .swc
 ./metaid
+.playwright-mcp/
