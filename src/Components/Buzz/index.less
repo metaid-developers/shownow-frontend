@@ -55,3 +55,54 @@
     }
   }
 }
+
+.simpleNoteMarkdown {
+  font-size: 14px;
+  line-height: 1.7;
+  word-break: break-word;
+
+  p {
+    margin-bottom: 8px;
+  }
+
+  blockquote {
+    margin: 8px 0;
+    padding: 4px 12px;
+    border-left: 3px solid rgba(255, 255, 255, 0.25);
+    opacity: 0.85;
+  }
+
+  code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  pre {
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    background: rgba(255, 255, 255, 0.08);
+
+    code {
+      padding: 0;
+      background: none;
+    }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 4px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  img {
+    display: block;
+    margin: 8px 0;
+  }
+}
