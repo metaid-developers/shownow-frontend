@@ -1,6 +1,7 @@
 import { curNetwork } from "@/config";
 import { fetchBuzzDetail, getUserInfo } from "@/request/api";
 import {
+  DownOutlined,
   LinkOutlined,
   MailOutlined,
   SyncOutlined,
@@ -8,7 +9,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Tag, Typography, theme } from "antd";
 import { isEmpty, isNil } from "ramda";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { history, useModel } from "umi";
 import { FollowIconComponent } from "../Follow";
 import UserAvatar from "../UserAvatar";
@@ -46,7 +47,7 @@ export default ({
   handleClick,
 }: Props) => {
   const {
-    token: { colorBorderSecondary, colorBorder, colorPrimary },
+    token: { colorBorderSecondary, colorBorder, colorPrimary, colorBgBlur, colorBgContainer },
   } = theme.useToken();
   const { user } = useModel("user");
 
@@ -67,6 +68,29 @@ export default ({
     () => (note ? prepareNoteMarkdown(note.content) : ""),
     [note]
   );
+
+  // Collapse long note bodies the same way TextWithTrans clamps simplebuzz
+  // text: fixed max-height, gradient fade, and an expand button.
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOverflowing, setIsOverflowing] = useState(false);
+
+  useEffect(() => {
+    const body = bodyRef.current;
+    const inner = innerRef.current;
+    if (!body || !inner) {
+      return;
+    }
+    const measure = () => {
+      setIsOverflowing(inner.scrollHeight > body.offsetHeight);
+    };
+    measure();
+    // Markdown images load lazily and change the content height afterwards.
+    const observer = new ResizeObserver(measure);
+    observer.observe(inner);
+    return () => observer.disconnect();
+  }, [markdownSource, isMarkdown, note?.content]);
 
   const { data: noteMedia } = useQuery({
     enabled: !isEmpty(note?.coverImg ?? "") || !isEmpty(note?.attachments ?? []),
@@ -95,8 +119,9 @@ export default ({
         </Paragraph>
       );
     }
+    let inner: ReactNode;
     if (isMarkdown) {
-      return (
+      inner = (
         <div className="simpleNoteMarkdown">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -141,11 +166,53 @@ export default ({
           </ReactMarkdown>
         </div>
       );
+    } else {
+      inner = (
+        <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
+          {note.content}
+        </Paragraph>
+      );
     }
     return (
-      <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>
-        {note.content}
-      </Paragraph>
+      <div
+        ref={bodyRef}
+        style={{
+          position: "relative",
+          maxHeight: isExpanded ? "none" : 200,
+          overflow: "hidden",
+          transition: "max-height 0.3s ease",
+        }}
+      >
+        <div ref={innerRef}>{inner}</div>
+        {isOverflowing && !isExpanded && (
+          <div
+            style={{
+              width: "100%",
+              paddingTop: 78,
+              backgroundImage: `linear-gradient(-180deg,${colorBgBlur} 0%,${colorBgContainer} 100%)`,
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 10,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              variant="filled"
+              color="primary"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsExpanded(true);
+              }}
+              icon={<DownOutlined />}
+            />
+          </div>
+        )}
+      </div>
     );
   };
 
