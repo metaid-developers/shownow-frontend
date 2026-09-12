@@ -1059,7 +1059,7 @@ export const getReplyContent = async (params: { pinId: string }) => {
     contentType?: string;
     attachments?: string[];
     [key: string]: unknown;
-  }>(`${getHostByNet(curNetwork)}/content/${params.pinId}`, {
+  }>(`${curNetwork === "mainnet" ? "https://manapi.metaid.io" : getHostByNet(curNetwork)}/content/${params.pinId}`, {
     method: "GET",
   });
   return ret;
@@ -1070,7 +1070,7 @@ export const getRewardContent = async (params: { pinId: string }) => {
     coinType: "mvc" | "btc";
     amount: number;
     message: string;
-  }>(`${getHostByNet(curNetwork)}/content/${params.pinId}`, {
+  }>(`${curNetwork === "mainnet" ? "https://manapi.metaid.io" : getHostByNet(curNetwork)}/content/${params.pinId}`, {
     method: "GET",
   });
   return ret;
@@ -1110,7 +1110,7 @@ export async function broadcast(
 
 export const fetchBuzzContent = async (params: { pinId: string }) => {
   return request<SimpleBuzz | PayBuzz>(
-    `${getHostByNet(curNetwork)}/content/${params.pinId}`,
+    `${curNetwork === "mainnet" ? "https://manapi.metaid.io" : getHostByNet(curNetwork)}/content/${params.pinId}`,
     {
       method: "GET",
     }
