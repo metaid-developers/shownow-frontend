@@ -164,9 +164,26 @@ export default ({
 
 
 
+    const { data: fullBuzzContent } = useQuery({
+        enabled: !isEmpty(buzzItem?.id),
+        queryKey: ["buzzFullContent", buzzItem?.id],
+        queryFn: () => fetchBuzzContent({ pinId: buzzItem!.id }),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const contentBuzzItem = useMemo(() => {
+        if (!fullBuzzContent) return buzzItem;
+        return {
+            ...buzzItem,
+            content: typeof fullBuzzContent === "string"
+                ? fullBuzzContent
+                : JSON.stringify(fullBuzzContent),
+        };
+    }, [buzzItem, fullBuzzContent]);
+
     const payBuzz = useMemo(() => {
         try {
-            let _summary = buzzItem!.content;
+            let _summary = contentBuzzItem!.content;
             const isSummaryJson = _summary.startsWith("{") && _summary.endsWith("}");
             const parseSummary = isSummaryJson ? JSON.parse(_summary) : {};
             return parseSummary.publicContent ? buzzItem : undefined;
@@ -175,7 +192,7 @@ export default ({
             return undefined;
         }
 
-    }, [buzzItem]);
+    }, [contentBuzzItem]);
 
 
 
@@ -184,7 +201,7 @@ export default ({
     const quotePinId = useMemo(() => {
         if (isForward) return "";
         try {
-            let _summary = buzzItem!.content;
+            let _summary = contentBuzzItem!.content;
             const isSummaryJson = _summary.startsWith("{") && _summary.endsWith("}");
             const parseSummary = isSummaryJson ? JSON.parse(_summary) : {};
             return isSummaryJson && !isEmpty(parseSummary?.quotePin ?? "")
@@ -195,7 +212,7 @@ export default ({
             return "";
         }
 
-    }, [buzzItem, isForward]);
+    }, [contentBuzzItem, isForward]);
 
     const { isLoading: isQuoteLoading, data: quoteContentData } = useQuery({
         enabled: !isEmpty(quotePinId),
@@ -216,8 +233,8 @@ export default ({
     });
 
     const { data: decryptContent, refetch: refetchDecrypt, isLoading: decryptLoading } = useQuery({
-        queryKey: ["buzzdecryptContent", buzzItem!.id, chain, user.address],
-        queryFn: () => decodePayBuzz(buzzItem, manPubKey!, isLogin),
+        queryKey: ["buzzdecryptContent", contentBuzzItem!.id, chain, user.address],
+        queryFn: () => decodePayBuzz(contentBuzzItem!, manPubKey!, isLogin),
     });
 
 
